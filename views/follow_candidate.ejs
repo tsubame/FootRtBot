@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+		<table id = 'followCandidates'>
+	<%
+	for(var i in users) {
+	%>
+			<tr>
+				<td>
+					<a href="https://twitter.com/<%= users[i].screen_name %>" class="twitter-follow-button" data-show-count="false">Follow @foot_rt</a>
+					<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+				</td>
+				<td><%= users[i].name %></td>
+				<td><a href = 'http://twitter.com/<%= users[i].screen_name %>' target='_blank'>Link</a></td>
+				<td><%= users[i].followed_count %></td>
+			</tr>
+	<%
+	}
+	%>
+		</table>
+
+	<a href="https://twitter.com/abc" class="twitter-follow-button" data-show-count="false">Follow @foot_rt</a>
+	<script>
+		!function(d, s, id){
+			var js, fjs = d.getElementsByTagName(s)[0];
+			if(!d.getElementById(id)){
+				js = d.createElement(s);
+				js.id = id;
+				js.src = "//platform.twitter.com/widgets.js";
+				fjs.parentNode.insertBefore(js, fjs);
+			}
+		}(document, "script", "twitter-wjs");
+	</script>
+  </body>
+</html>
