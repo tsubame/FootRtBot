@@ -1,5 +1,5 @@
 /**
- * accountsコレクションのモデル
+ * tweetsコレクションのモデル
  *
  */
 
@@ -16,21 +16,21 @@ exports.save   = save;
 exports.remove = remove;
 exports.findByFollowedCount = findByFollowedCount;
 
-
 /**
  * スキーマ定義
  */
 var schema = new mongoose.Schema({
 	id: { type: Number, required: true },
-	name: { type: String, required: true },
-	screen_name: { type: String, required: true },
-	followed_count: { type: Number}
+	user_id: { type: Number, required: true },
+	user_name: { type: String, required: true },
+	text: { type: String, required: true },
+	rt_count: { type: Number}
 });
 
 // コレクション名、スキーマ
-mongoose.model('follow_candidate', schema);
+mongoose.model('tweet', schema);
 // モデル
-var CandidateModel = mongoose.model('follow_candidate');
+var CandidateModel = mongoose.model('tweet');
 
 /**
  * 削除
@@ -87,9 +87,6 @@ function save(user) {
  */
 function findByFollowedCount(limit, callback) {
 	var DEFAULT_LIMIT_COUNT = 150;
-
-	var nowTs = (new Date().getTime) / 1000;
-	var yesterdayTs = nowTs - 86400;
 
 	if (! limit) {
 		limit = DEFAULT_LIMIT_COUNT;

@@ -6,7 +6,11 @@ var DB_NAME = 'foot_rt';
 
 
 exports.init = function(){
-	mongoose.connect('mongodb://' + DB_HOST + '/' + DB_NAME);
+	try {
+		mongoose.connect('mongodb://' + DB_HOST + '/' + DB_NAME);
+	} catch (e) {
+		console.log(e);
+	}
 }
 
 /**

@@ -3,15 +3,14 @@
  */
 
 var express = require('express')
-  , routes = require('./routes')
-  , tweet = require('./routes/tweet')
-  , account = require('./routes/account')
+  , routes  = require('./routes')
+  , tweet   = require('./routes/tweet')
   , follow_candidate = require('./routes/follow_candidate')
-  , user = require('./routes/user')
+  //, user   = require('./routes/user')
   , models = require('./models')
-  , http = require('http')
-  , path = require('path')
-  , OAuth = require('oauth').OAuth;
+  , http   = require('http')
+  , path   = require('path')
+  , OAuth  = require('oauth').OAuth;
 
 var app = express();
 
@@ -50,21 +49,18 @@ app.configure('development', function(){
  * ルーティング
  */
 app.get('/', routes.index);
-app.get('/users', user.list);
+//app.get('/users', user.list);
 app.get('/ejs', function(req, res){
 	res.render('timeline.ejs', {text: "", xml: ""});
 });
 
-app.get('/tweet/auth', tweet.auth);
-app.get('/tweet/authCallBack', tweet.authCallBack);
+//app.get('/tweet/auth', tweet.auth);
+//app.get('/tweet/authCallBack', tweet.authCallBack);
+
 app.get('/tweet/rtTweets', tweet.rtTweets);
 app.get('/tweet/demo', tweet.demo);
 app.get('/tweet/dbdemo', tweet.dbdemo);
-
-//app.get('/tweet/dbdemo', tweet.dbdemo);
-
-//app.get('/demo', routes.demo);
-//app.get('/account/update', account.update);
+app.get('/tweet/sendmail', tweet.sendmail);
 
 app.get('/demo', function(req, res) {
 	res.render('demo', {title: 'layout'});
@@ -75,6 +71,8 @@ app.get('/follow_candidate/show', follow_candidate.show);
 app.get('/follow_candidate/follow/:screen_name', function(req, res) {
 	follow_candidate.follow(req, res);
 });
+
+
 
 http.createServer(app).listen(app.get('port'), function(){
 	console.log("Express server listening on port " + app.get('port'));

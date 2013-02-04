@@ -6,14 +6,15 @@
     "start": "node app"
   },
   "dependencies": {
-  	"async": "*",
+    "async": "*",
     "express": "3.0.6",
     "ejs": "*",
-	"mongoose": "2.4.7",
-	"jade": "*",
-	"oauth": "*",
-	"passport": "*",
-	"passport-oauth": "*",
-	"passport-twitter": "*"
+    "mongoose": "2.4.7",
+    "jade": "*",
+    "oauth": "*",
+    "passport": "*",
+    "passport-oauth": "*",
+    "passport-twitter": "*",
+    "nodemailer": "~0.3.37"
   }
 }
