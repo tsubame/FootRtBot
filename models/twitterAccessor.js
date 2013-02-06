@@ -24,8 +24,10 @@ exports.setRecentRetweets = function(retweets) {
 exports.retweetById = retweetById;
 
 exports.demo = function() {
-	rtTweets(function() {
-		console.log(rt_success_tweets, rt_candidates);
+	console.log(recent_retweets);
+
+	getMyRetweets(function() {
+		console.log(recent_retweets);
 	});
 }
 
@@ -160,6 +162,9 @@ function initArray() {
 	rt_success_tweets = [];
 };
 
+
+
+
 /**
  * TLを取得して100RT以上のツイートをRT
  *
@@ -168,7 +173,13 @@ function initArray() {
 function rtTweets(callback) {
 	initArray();
 
+// まず自分のRTしたTLを取得した方がいい？
+
+
 	async.series([
+	    function(cb) {
+	    	getMyRetweets(cb);
+		},
 		function(cb) {
 			getTimelineTweets(cb);
 		},
@@ -184,6 +195,39 @@ function rtTweets(callback) {
 
 			callback(rt_success_tweets, rt_candidates);
 		}
+	});
+}
+
+/**
+ * 自分が最近リツイートしたものを取得
+ *
+ * @var function callback
+ */
+function getMyRetweets(callback) {
+	var url = 'https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&screen_name=' + MY_ACCOUNT;
+	accessApi(url, function(data) {
+		var tweets = JSON.parse(data);
+		// ツイートの件数ループ
+		for (var i in tweets) {
+			// RTされたツイートならretweeted_statusを取り出す
+			if (tweets[i].retweeted_status) {
+				var tweet_data = tweets[i].retweeted_status;
+
+				var id = tweet_data.id_str;
+
+				var tweet = {
+					id: 	   tweet_data.id_str,
+					user_id:   tweet_data.user.id_str,
+					user_name: tweet_data.user.name,
+					text:      tweet_data.text,
+					rt_count:  tweet_data.retweet_count,
+					created:   tweet_data.created_at
+				};
+				recent_retweets[id] = tweet;
+			}
+		}
+
+		callback();
 	});
 }
 

@@ -22,11 +22,13 @@ exports.sendmail = function(req, res) {
 }
 
 exports.demo = function(req, res) {
+	twAccessor.demo();
+	/*
 	var retweet_model = require('../models/retweet_model');
 	retweet_model.getRecentRetweets(100, function(result) {
 		console.log(result);
 	});
-
+*/
 	res.send("done.");
 }
 
@@ -41,15 +43,15 @@ exports.dbdemo = function(req, res) {
 function rtTweets(req, res){
 	var recent_retweets = [];
 	async.series([
-		function(callback) {
+		/*function(callback) {
 			// 最近RTしたツイートを取得
 			retweet_model.getRecentRetweets(100, function(results) {
 				recent_retweets = results;
+				twAccessor.setRecentRetweets(recent_retweets);
 				callback();
 			});
-		},
+		},*/
 		function(callback) {
-			twAccessor.setRecentRetweets(recent_retweets);
 			twAccessor.rtTweets(function(rt_success_tweets, rt_candidates) {
 				for(var i in rt_success_tweets) {
 					retweet_model.save(rt_success_tweets[i]);
@@ -69,7 +71,7 @@ function rtTweets(req, res){
 		} else {
 			console.log('finished!');
 
-			res.render('index', { title: 'Express' });
+			res.send("done.");
 		}
 	});
 };
