@@ -58,6 +58,9 @@ app.get('/ejs', function(req, res){
 //app.get('/tweet/authCallBack', tweet.authCallBack);
 
 app.get('/tweet/rtTweets', tweet.rtTweets);
+app.get('/tweet/showCandidates', tweet.showCandidates);
+app.get('/tweet/showRecentRetweets', tweet.showRecentRetweets);
+app.get('/tweet/rtFromCandidates/:tweet_id', tweet.rtFromCandidates);
 app.get('/tweet/demo', tweet.demo);
 app.get('/tweet/dbdemo', tweet.dbdemo);
 app.get('/tweet/sendmail', tweet.sendmail);

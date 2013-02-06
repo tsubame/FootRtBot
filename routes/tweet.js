@@ -1,39 +1,31 @@
 /**
- *
+ * requires.
  *
  */
-//var twAccessor = require('../models/twitterAccessor');
 var models = require('../models');
-//var AccountModel = models.AccountModel;
-var retweet_model = require('../models/retweet');
 var nodemailer = require("nodemailer");
+var async = require('async');
+var retweet_model = require('../models/retweet_model');
+var rt_candidate_model = require('../models/rt_candidate_model');
+
+var twAccessor = require('../models/twitterAccessor');
+
 
 /**
  * exports.
  */
-exports.rtTweets = function(req, res){
-	var twAccessor = require('../models/twitterAccessor');
+exports.rtTweets = rtTweets;
 
-	twAccessor.rtTweets(function(retweets) {
-		console.log('finished.');
-		console.log(retweets);
-
-		var saveTweets = retweets;
-
-		for(var i in saveTweets) {
-			var retweet = saveTweets[i];
-
-			retweet_model.save(retweet);
-			console.log('saved.');
-		}
-	});
-
-	res.render('index', { title: 'Express' });
-};
+exports.sendmail = function(req, res) {
+	sendMail();
+	res.send("done.");
+}
 
 exports.demo = function(req, res) {
-	var twAccessor = require('../models/twitterAccessor');
-	twAccessor.demo();
+	var retweet_model = require('../models/retweet_model');
+	retweet_model.getRecentRetweets(100, function(result) {
+		console.log(result);
+	});
 
 	res.send("done.");
 }
@@ -42,42 +34,141 @@ exports.dbdemo = function(req, res) {
 	res.send("done.");
 }
 
-function logic() {
-	var todaysTweets = [];
-	// 最近RTしたツイートを取得 とりあえず100件？
-	retweet_model.getTodaysRetweets(function(retweets) {
-		todaysTweets = retweets;
-	});
-	twAccessor.setRecentRetweets(todaysTweets);
 
-	// TLを取得
-	twAccessor.rtTweets(function(retweets) {
-		var saveTweets = retweets;
+/**
+ * アクション
+ */
+function rtTweets(req, res){
+	var recent_retweets = [];
+	async.series([
+		function(callback) {
+			// 最近RTしたツイートを取得
+			retweet_model.getRecentRetweets(100, function(results) {
+				recent_retweets = results;
+				callback();
+			});
+		},
+		function(callback) {
+			twAccessor.setRecentRetweets(recent_retweets);
+			twAccessor.rtTweets(function(rt_success_tweets, rt_candidates) {
+				for(var i in rt_success_tweets) {
+					retweet_model.save(rt_success_tweets[i]);
+					console.log('retweet saved.');
+				}
 
-		for(var i in saveTweets) {
-			var retweet = saveTweets[i];
+				for(var i in rt_candidates) {
+					rt_candidate_model.saveIfNotExist(rt_candidates[i]);
+				}
+			});
+			callback();
+		}
+	],
+	function(err, results) {
+		if(err) {
+			throw err;
+		} else {
+			console.log('finished!');
 
-			retweet_model.save(retweet);
-			console.log('saved.');
+			res.render('index', { title: 'Express' });
 		}
 	});
+};
+
+/**
+ * exports.
+ */
+exports.showCandidates = showCandidates;
+
+
+/**
+ * アクション
+ */
+function showCandidates(req, res){
+	var recent_candidates = [];
+	async.series([
+		function(callback) {
+			rt_candidate_model.getRecents(100, function(results) {
+				recent_candidates = results;
+				callback();
+			});
+		}
+	],
+	function(err, results) {
+		if(err) {
+			throw err;
+		} else {
+			console.log(recent_candidates);
+
+			res.render('rt_candidate', { candidates: recent_candidates });
+		}
+	});
+};
+
+exports.showRecentRetweets = showRecentRetweets;
+
+
+/**
+ * アクション
+ */
+function showRecentRetweets(req, res){
+	var recent_retweets = [];
+	async.series([
+		function(callback) {
+			// 最近RTしたツイートを取得
+			retweet_model.getRecentRetweets(100, function(results) {
+				recent_retweets = results;
+				callback();
+			});
+		},
+	],
+	function(err, results) {
+		if(err) {
+			throw err;
+		} else {
+			res.render('show_recent_rts', { retweets: recent_retweets });
+		}
+	});
+};
+
+
+exports.rtFromCandidates = rtFromCandidates;
+
+/**
+ * アクション
+ */
+function rtFromCandidates(req, res) {
+	var tweet_id = String(req.params.tweet_id);
+
+	twAccessor.retweetById(tweet_id, function(){
+
+		var tweet = {
+			id: tweet_id,
+			user_id:   '　',
+			user_name: '　',
+			text:      '　',
+			rt_count:  null
+		}
+
+		retweet_model.save(tweet);
+		rt_candidate_model.removeById(tweet_id);
+		res.send("done.");
+	});
 }
 
-
-var smtpTransport = nodemailer.createTransport("SMTP",{
-    service: "Gmail",
-    auth: {
-        user: "apricot34",
-        pass: "sheisagirl"
-    }
-});
-
-exports.sendmail = function(req, res) {
-	sendMail();
-	res.send("done.");
-}
-
+/**
+ * アクション
+ * メール送信
+ *
+ */
 function sendMail() {
+	var smtpTransport = nodemailer.createTransport("SMTP",{
+	    service: "Gmail",
+	    auth: {
+	        user: "apricot34",
+	        pass: "sheisagirl"
+	    }
+	});
+
 	retweet_model.getTodaysRetweets(function(results) {
 		//console.log(results);
 
