@@ -221,6 +221,7 @@ function getTodaysCandidates(callback) {
 	RtCandidateModel
 	.find({})
 	.where('created').gt(yesterday)
+	.sort('-created')
 	.exec(function(err, result) {
 		if (err) {
 			console.log(err);
