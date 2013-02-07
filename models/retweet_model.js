@@ -20,15 +20,35 @@ exports.getRecentRetweets = getRecentRetweets;
 /**
  * スキーマ定義
  */
+
 var schema = new mongoose.Schema({
-	id:        { type: String, required: true },
-	user_id:   { type: Number, required: true },
-	user_name: { type: String, required: true },
-	text:      { type: String, required: true },
-	rt_count:  { type: Number},
-	created:   { type: Date}
+	id:          { type: String, required: true },
+	user_id:     { type: String, required: true },
+	user_name:   { type: String, required: true },
+	user_s_name: { type: String },
+	text:        { type: String, required: true },
+	rt_count:    { type: Number},
+	posted:      { type: Date},
+	created:     { type: Date},
+	rt_user:     { type: String}
 });
 
+/*
+var schema = new mongoose.Schema({
+	id_str:   { type: String, required: true },
+	text:     { type: String, required: true },
+	rt_count: { type: Number, required: true },
+	posted:   { type: Date, required: true },
+	created:  { type: Date, required: true },
+	rt_user:  { type: String, required: true },
+	user: {
+		id_str:  { type: String, required: true },
+		name:  { type: String, required: true },
+		screen_name:  { type: String, required: false },
+		is_friend: { type: Boolean, required: false }
+	}
+});
+*/
 // コレクション名、スキーマ
 mongoose.model('retweets', schema);
 // モデル

@@ -26,8 +26,9 @@ exports.retweetById = retweetById;
 exports.demo = function() {
 	console.log(recent_retweets);
 
-	getMyRetweets(function() {
-		console.log(recent_retweets);
+	getTimelineTweets(function() {
+		//console.log(should_rt_tweets);
+		console.log(rt_candidates);
 	});
 }
 
@@ -221,7 +222,7 @@ function getMyRetweets(callback) {
 					user_name: tweet_data.user.name,
 					text:      tweet_data.text,
 					rt_count:  tweet_data.retweet_count,
-					created:   tweet_data.created_at
+					posted:    tweet_data.created_at
 				};
 				recent_retweets[id] = tweet;
 			}
@@ -271,20 +272,39 @@ function getTimelineTweets(callback) {
 					continue;
 				}
 				// 日付の設定
-				var	mts     =  Date.parse(tweet_data.created_at);
-				var created = new Date().setTime(mts);
+				var	mts    = Date.parse(tweet_data.created_at);
+				var posted = new Date();
+				posted.setTime(mts);
 
 				var tweet = {
-					id: 	   tweet_data.id_str,
-					user_id:   tweet_data.user.id_str,
-					user_name: tweet_data.user.name,
-					text:      tweet_data.text,
-					rt_count:  tweet_data.retweet_count,
-					created:   created,
+					id: 	     tweet_data.id_str,
+					user_id:     tweet_data.user.id_str,
+					user_name:   tweet_data.user.name,
+					user_s_name: tweet_data.user.screen_name,
+					text:        tweet_data.text,
+					rt_count:    tweet_data.retweet_count,
+					posted:      posted,
+					created:     new Date(),
 					is_friend_tweet: is_friend_tweet,
-					rt_user: rt_user
+					rt_user:     rt_user
 				};
 
+/*
+				var tweet = {
+					id_str:   tweet_data.id_str,
+					user: {
+						id_str:  tweet_data.user.id_str,
+						name:  tweet_data.user.name,
+						screen_name:  tweet_data.user.screen_name,
+						is_friend: is_friend_tweet
+						},
+					text:     tweet_data.text,
+					rt_count: tweet_data.retweet_count,
+					posted:   posted,
+					created:  new Date(),
+					rt_user:  rt_user
+				};
+*/
 				// フレンドのツイートならRT対象に加える
 				if (is_friend_tweet == true) {
 					should_rt_tweets[id] = tweet;

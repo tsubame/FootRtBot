@@ -163,36 +163,34 @@ function rtFromCandidates(req, res) {
  *
  */
 function sendMail() {
-	var smtpTransport = nodemailer.createTransport("SMTP",{
-	    service: "Gmail",
-	    auth: {
-	        user: "apricot34",
-	        pass: "sheisagirl"
-	    }
-	});
+
 
 	retweet_model.getTodaysRetweets(function(results) {
-		//console.log(results);
+		var smtpTransport = nodemailer.createTransport("SMTP",{
+		    service: "Gmail",
+		    auth: {
+		        user: "apricot34",
+		        pass: "sheisagirl"
+		    }
+		});
 
 		var full_text = '';
 
 		for(var i = 0; i < results.length; i++) {
 			var tweet = results[i];
-
-			var text = 'user_name: ' + tweet.user_name + '\n' +
-					'text: ' + tweet.text + '\n' +
-					'RT: ' + tweet.rt_count + '\n\n'
+			var text = tweet.user_name + '\n' +
+					'RT: ' + tweet.rt_count + '\n' + tweet.text + '\n' +
+					 '\n\n';
 
 			full_text += text;
 
 		}
-		//var text = result;
 		console.log(full_text);
 
 		var mailOptions = {
-		    from: "test <apricot34@gmail.com>",
+		    from: "100RTbot <apricot34@gmail.com>",
 		    to: "dortmund23andcska18@gmail.com",
-		    subject: "テスト2",
+		    subject: "本日のRT",
 		    text: full_text
 		}
 
@@ -205,7 +203,46 @@ function sendMail() {
 
 		    smtpTransport.close();
 		});
-
 	});
-	//var text = '(。・ω・)ノ゛ コンチャ♪ ';
+
+	rt_candidate_model.getTodaysCandidates(function(results) {
+		var smtpTransport = nodemailer.createTransport("SMTP",{
+		    service: "Gmail",
+		    auth: {
+		        user: "apricot34",
+		        pass: "sheisagirl"
+		    }
+		});
+
+		var full_text = '';
+
+		for(var i = 0; i < results.length; i++) {
+			var tweet = results[i];
+
+			var text = tweet.user_name + '\n' +
+					'RT: ' + tweet.rt_count + '\n' + tweet.text + '\n' +
+					 '\n\n';
+
+			full_text += text;
+
+		}
+		console.log(full_text);
+
+		var mailOptions = {
+		    from: "100RTbot <apricot34@gmail.com>",
+		    to: "dortmund23andcska18@gmail.com",
+		    subject: "本日のRT候補",
+		    text: full_text
+		}
+
+		smtpTransport.sendMail(mailOptions, function(error, response){
+			if(error){
+				console.log(error);
+			} else {
+		        console.log("Message sent: " + response.message);
+		    }
+
+		    smtpTransport.close();
+		});
+	});
 }
