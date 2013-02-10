@@ -18,6 +18,7 @@ exports.remove = remove;
 exports.getRecents = getRecents;
 exports.removeById = removeById;
 exports.getTodaysCandidates = getTodaysCandidates;
+exports.setDeleted = setDeleted;
 
 /**
  * スキーマ定義
@@ -46,7 +47,8 @@ var schema = new mongoose.Schema({
 	rt_count:    { type: Number},
 	posted:      { type: Date, required: true},
 	created:     { type: Date, required: true},
-	rt_user:     { type: String}
+	rt_user:     { type: String},
+	is_deleted:  { type: Boolean, default: false}
 });
 /*
 var schema = new mongoose.Schema({
@@ -110,6 +112,39 @@ function removeById(tweet_id) {
 							console.log(err);
 						}
 					});
+				} catch(e) {
+					console.log(e);
+				}
+			}
+		}
+	});
+}
+
+/**
+ * 削除マークを付ける
+ */
+function setDeleted(tweet_id) {
+	var tweet = null;
+	var model = new RtCandidateModel(tweet);
+
+	RtCandidateModel
+	.where('id').equals(tweet_id)
+	.find({})
+	.exec(function(err, result) {
+		if (err) {
+			console.log(err);
+		} else {
+			if (0 < result.length) {
+				tweet = result[0];
+
+				try {
+
+					RtCandidateModel.update(tweet, { $set: { is_deleted : true } }, function(err, result) {
+						if (err) {
+							console.log(err);
+						}
+					});
+
 				} catch(e) {
 					console.log(e);
 				}
@@ -192,6 +227,7 @@ function getRecents(limit, callback) {
 
 	RtCandidateModel
 	.find({})
+	.where('is_deleted').equals(false)
 	.limit(limit)
 	.sort('-created')
 	.exec(function(err, result) {
@@ -208,6 +244,7 @@ function getRecents(limit, callback) {
 
 /**
  * 24時間以内のRT候補を取得
+ * 削除済みマークがついてるものは取得しない
  *
  */
 function getTodaysCandidates(callback) {
@@ -221,6 +258,7 @@ function getTodaysCandidates(callback) {
 	RtCandidateModel
 	.find({})
 	.where('created').gt(yesterday)
+	.where('is_deleted').equals(false)
 	.sort('-created')
 	.exec(function(err, result) {
 		if (err) {

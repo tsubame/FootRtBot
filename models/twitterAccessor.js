@@ -23,12 +23,13 @@ exports.setRecentRetweets = function(retweets) {
 
 exports.retweetById = retweetById;
 
-exports.demo = function() {
-	console.log(recent_retweets);
+exports.showRtUserIds = getRtUserIds;
 
-	getTimelineTweets(function() {
-		//console.log(should_rt_tweets);
-		console.log(rt_candidates);
+exports.demo = function() {
+	//console.log(recent_retweets);
+	getMyFollowsByIds(function() {
+		console.log(my_follows);
+		console.log(my_follow_count + '件');
 	});
 }
 
@@ -39,6 +40,8 @@ exports.demo = function() {
  * 自分のTwitterアカウント
  */
 var MY_ACCOUNT = 'foot_rt';
+
+var MY_TRUE_ACCOUNT = 'foot_rt2';
 
 /**
  * TLで取得するツイートの合計数
@@ -165,6 +168,13 @@ function initArray() {
 
 
 
+// rt 自分のリツイートを取得
+// rt_2 タイムラインを取得
+
+// RTするものを抽出
+
+// rt リツイート
+
 
 /**
  * TLを取得して100RT以上のツイートをRT
@@ -173,9 +183,6 @@ function initArray() {
  */
 function rtTweets(callback) {
 	initArray();
-
-// まず自分のRTしたTLを取得した方がいい？
-
 
 	async.series([
 	    function(cb) {
@@ -246,7 +253,8 @@ function getTimelineTweets(callback) {
 		var url = 'https://api.twitter.com/1/statuses/home_timeline.json?count=' + TL_GET_COUNT_ONCE + '&page=' + n;
 		//var url = 'https://api.twitter.com/1.1/statuses/home_timeline.json?count=' + TL_GET_COUNT_ONCE + '&page=' + n;
 
-		accessApi(url, function(data) {
+		//accessApi(url, function(data) {
+		accessApi2(url, function(data) {
 			var tweets = JSON.parse(data);
 			// ツイートの件数ループ
 			for (var i in tweets) {
@@ -286,25 +294,10 @@ function getTimelineTweets(callback) {
 					posted:      posted,
 					created:     new Date(),
 					is_friend_tweet: is_friend_tweet,
-					rt_user:     rt_user
+					rt_user:     rt_user,
+					is_deleted:  false
 				};
 
-/*
-				var tweet = {
-					id_str:   tweet_data.id_str,
-					user: {
-						id_str:  tweet_data.user.id_str,
-						name:  tweet_data.user.name,
-						screen_name:  tweet_data.user.screen_name,
-						is_friend: is_friend_tweet
-						},
-					text:     tweet_data.text,
-					rt_count: tweet_data.retweet_count,
-					posted:   posted,
-					created:  new Date(),
-					rt_user:  rt_user
-				};
-*/
 				// フレンドのツイートならRT対象に加える
 				if (is_friend_tweet == true) {
 					should_rt_tweets[id] = tweet;
@@ -369,6 +362,16 @@ var oa = new OAuth(
 	  'HMAC-SHA1'
 	);
 
+var oa_2 = new OAuth(
+  REQUEST_TOKEN_URL,
+  ACCESS_TOKEN_URL,
+  'xeGIQrFfbEtYq6JxBxF6g',
+  'sh5zxBMGDWtOB5t1P2O3oDMhnHJgQuArDmqnxApSUg',
+  '1.0',
+  OAUTH_CALLBACK_URL,// コールバックのアドレス
+  'HMAC-SHA1'
+);
+
 /**
  * TwitterAPIにGETでアクセス
  *
@@ -393,51 +396,208 @@ function accessApi(url, callback) {
 	);
 }
 
+function accessApi2(url, callback) {
+	oa_2.getProtectedResource(
+		url,
+		'GET',
+		'1156953000-0GjxaYlc3aXWoNUvRMKkQ72eD5rTWcSXhkc1DEI',
+		'JlrR8zB7zCadUoLJwbRZ8VphBWP4kE0C0WfFTSNNA',
+		function(err, data, response) {
+			if(err){
+				console.log(url);
+				console.log(err);
+				return;
+			}
+
+			callback(data);
+		}
+	);
+}
 
 
 
+
+exports.pickupRtFromNotFollows = pickupRtFromNotFollows;
 
 /**
- * フォローしてない人のツイートから
- * リツイートすべきものを抽出
+ * RT候補から
+ * リツイートすべきものを抽出してRT
  *
  * @var function callback
  */
-function pickupRtFromNotFollows(callback) {
+function pickupRtFromNotFollows(recent_candidates, callback) {
+	initArray();
+
+	var skip_rt_count = 1000;
 	var end_count = 0;
 
-	// ツイートの件数ループ
-	for (var i = 0; i < not_follow_tweets.length; i++) {
-		var tweet = not_follow_tweets[i];
-
-		// RTしたユーザのIDを取得
-		getRtUserIds(tweet.id, tweet.rt_count, function(user_ids) {
-			var user_count = 0;
-
-			for (var j = 0; j < user_ids.length; j++) {
-				if (my_follows[user_ids[j]]) {
-					user_count ++;
+	async.series([
+	    function(cb) {
+	    	// 自分のフォローを取得
+	    	getMyFollowsByIds(cb);
+		},
+		function(cb) {
+			//console.log(recent_candidates);
+			for (var i = 0; i < recent_candidates.length; i++) {
+				var tweet = recent_candidates[i];
+				if (skip_rt_count < tweet.rt_count) {
+					end_count ++;
+					console.log('スキップしました RT:' + tweet.rt_count);
+					continue;
 				}
-			}
-			// フォローしたユーザが2件以上RTしていたら
-			if (2 <= user_count) {
-				retweets.push(tweet);
-			// RT候補に入れる
-			} else {
-				rt_candidates.push(tweet);
+				rtFromCandidate(tweet, function() {
+					end_count ++;
+				});
 			}
 
-			end_count ++;
-		});
-	}
+			var intId = setInterval(function() {
+				//console.log(end_count);
+				if(end_count == recent_candidates.length) {
+					clearInterval(intId);
+					cb();
+				}
+			}, 500);
+		}
+	],
+	function(err, results) {
+		if(err) {
+			throw err;
+		} else {
+			console.log('finished!');
 
-	var intId = setInterval(function() {
-		if(end_count == not_follow_tweets.length) {
-			clearInterval(intId);
+			callback(rt_success_tweets);
+		}
+	});
+}
+
+/**
+ * 自分がフォローしているユーザのIDを取得
+ * 100件以上取得できる
+ *
+ * @var function callback
+ */
+function getMyFollowsByIds(callback) {
+	var url = 'https://api.twitter.com/1.1/friends/ids.json?screen_name=' + MY_TRUE_ACCOUNT;
+
+	accessApi(url, function(data) {
+		var results = JSON.parse(data);
+		var ids = results.ids;
+
+        for (var i in ids) {
+        	var id = String(ids[i]);
+			my_follows[id] = {
+				id: id
+			}
+
+			my_follow_count ++;
+		}
+		//console.log(my_follow_count);
+		callback();
+	});
+}
+
+/**
+ *
+ */
+function rtFromCandidate(tweet, callback) {
+	getRtUserIds(tweet.id, function(rt_user_ids) {
+		var match_user_count = 0;
+
+		var rt_user_count = 0;
+		for (var i in rt_user_ids) {
+			rt_user_count++;
+		}
+		console.log(rt_user_count + '人がRT');
+
+		// フレンドの件数ループ
+		for (var friend_id in my_follows) {
+			if (rt_user_ids[friend_id]) {
+				console.log(friend_id + 'がRTしています。');
+				match_user_count ++;
+			}
+		}
+
+		if (2 <= match_user_count) {
+			// リツイート
+			retweet(tweet, function() {
+				callback();
+			});
+		} else {
 			callback();
 		}
-	}, 500);
+	});
 }
+
+/**
+ * RTした人のIDを取得
+ *
+ * API 1
+ */
+function getRtUserIds(tweet_id, callback) {
+
+	var rt_count;
+	var user_ids = {};
+
+	async.series([
+	    function(cb) {
+			var url = 'https://api.twitter.com/1/statuses/retweets/' + tweet_id + '.json?count=100';
+console.log(tweet_id + 'のRTユーザを取得中...');
+			accessApi(url, function(data) {
+				var rts = JSON.parse(data);
+				rt_count = rts[0].retweeted_status.retweet_count;
+console.log('RT:' + rt_count);
+				for (var i in rts) {
+					var id = rts[i].user.id_str;
+					user_ids[id] = id;
+				}
+				cb();
+			});
+	    },
+	    function(cb) {
+	    	var end_count = 1;
+			var req_count = Math.ceil(rt_count / 100);
+			for (var i = 2; i <= req_count; i++) {
+				var url = 'https://api.twitter.com/1/statuses/' + tweet_id + '/retweeted_by/ids.json?count=100&page=' + i;
+console.log(tweet_id + 'のRTユーザを取得中... リクエスト回数：' + i);
+				accessApi(url, function(data) {
+
+					var rts = JSON.parse(data);
+
+					for (var j in rts) {
+						var id = String(rts[j]);
+						user_ids[id] = id;
+					}
+					end_count ++;
+				});
+			}
+
+			var intId = setInterval(function() {
+				if(end_count == req_count) {
+					clearInterval(intId);
+					cb();
+				}
+
+			}, 500);
+		}
+	],
+	function(err, results) {
+		if(err) {
+			throw err;
+		} else {
+			//console.log();
+
+			callback(user_ids);
+		}
+	});
+}
+
+
+
+
+
+
+
+
 
 /**
  * ツイートをリツイートする
@@ -487,21 +647,7 @@ function retweetById(tweet_id, callback) {
 			if(err){
 			} else {
 				console.log('RT成功：' + tweet_id);
-				//console.log(data);
 				//rt_success_tweets.push(tweet);
-/*
-				var tweet = {
-					id: 	   data.id_str,
-					user_id:   data.user.id_str,
-					user_name: data.user.name,
-					text:      data.text,
-					rt_count:  data.retweet_count
-					//created:   created,
-					//is_friend_tweet: is_friend_tweet,
-					//rt_user: rt_user
-				};
-
-								console.log(tweet);*/
 			}
 
 			callback();
@@ -514,6 +660,7 @@ function retweetById(tweet_id, callback) {
  *
  * @var String id
  */
+/*
 function getRtUserIds(id, rt_count, callback) {
 
 	var end_count = 0;
@@ -553,11 +700,109 @@ function getRtUserIds(id, rt_count, callback) {
 
 	}, 500);
 }
+*/
+
+function getRetweetUserIds1_1(id, callback) {
+
+	var end_count = 0;
+	var get_count_once = 100;
+	var user_ids = [];
+	var rt_count = 0;
+
+	async.series([
+	    function(cb) {
+	    	var url = 'https://api.twitter.com/1.1/statuses/retweets/' + id
+			+ '.json?count=' + get_count_once + '&page=1';
+
+			accessApi(url, function(data) {
+				var rts = JSON.parse(data);
+				rt_count = rts[0].retweeted_status.retweet_count;
+				for (var i in rts) {
+					user_ids.push(rts[i].user.id_str);//<Number
+				}
+console.log(rt_count + '件のRT');
+				end_count++;
+				cb();
+			});
+		},
+		function(cb) {
+			var req_count = Math.ceil(rt_count / get_count_once);
+
+			for (var i = 2; i <= req_count; i++) {
+				var url = 'https://api.twitter.com/1.1/statuses/retweets/' + id
+						+ '.json?count=' + get_count_once + '&page=' + i;
+
+				accessApi(url, function(data) {
+					var rts = JSON.parse(data);
+					console.log(String(rts.length) + '件のユーザを取得');
+
+					for (var i in rts) {
+						//console.log(rts[i].user.name);
+						user_ids.push(rts[i].user.id_str);//<Number
+					}
+
+					end_count++;
+				});
+			}
+
+		var intId = setInterval(function() {
+			if(end_count == req_count) {
+				clearInterval(intId);
+				cb();
+			}
+
+		}, 500);
+		}
+	],
+	function(err, results) {
+		if(err) {
+			throw err;
+		} else {
+			console.log('success!');
+			callback(user_ids);
+		}
+	});
+
+}
+
+exports.rtFromCandidate = rtFromCandidate;
 
 
 
 
+	function showRtIdsDemo2(tweet_id) {
+		var url = 'https://api.twitter.com/1/statuses/retweets/' + tweet_id + '.json?count=100&page=1';
 
+		var user_ids = [];
+		accessApi(url, function(data) {
+			var rts = JSON.parse(data);
+			rt_count = rts[0].retweeted_status.retweet_count;
+
+			for (var i in rts) {
+				//user_ids.push(rts[i]);//<Number
+				user_ids.push(rts[i].user.id_str);
+			}
+			console.log(user_ids);
+			console.log(user_ids.length);
+		});
+	}
+
+	function showRtIdsDemo3(tweet_id) {
+		var user_ids = [];
+    	var url = 'https://api.twitter.com/1.1/statuses/retweets/' + tweet_id
+		+ '.json?count=100&page=2';
+
+		accessApi(url, function(data) {
+			var rts = JSON.parse(data);
+			rt_count = rts[0].retweeted_status.retweet_count;
+			for (var i in rts) {
+				user_ids.push(rts[i].user.id_str);//<Number
+			}
+
+			console.log(rt_count + '件のRT');
+			console.log(user_ids.length);
+		});
+	}
 
 /**
  * フォローする候補を取得
@@ -647,6 +892,8 @@ function getFollowsById(id_str, callback) {
 	});
 }
 
+exports.getMyFollows = getMyFollows;
+
 /**
  * 自分がフォローしているユーザを取得
  * my_followsに取得する
@@ -673,31 +920,10 @@ function getMyFollows(callback) {
 			my_follow_count ++;
 		}
 
-		callback();
+		callback(my_follows);
 	});
 }
 
-function getMyFollowsByIds(callback) {
-	var url = 'https://api.twitter.com/1.1/friends/ids.json?screen_name=' + MY_ACCOUNT;
-
-	accessApi(url, function(data) {
-		var results = JSON.parse(data);
-
-		var ids = results.ids;
-        for (var i in ids) {
-        	var id = String(ids[i]);
-
-			my_follows[id] = {
-				id: id
-			}
-
-			my_follow_count ++;
-		}
-
-		console.log(my_follow_count);
-		callback();
-	});
-}
 
 /**
  * 自分がフォローしているユーザのフォローを取得

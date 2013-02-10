@@ -83,6 +83,8 @@ function save(tweet) {
 	model.save(function(err, result) {
 		if (err) {
 			console.log(err);
+		} else {
+			console.log('retweet saved.');
 		}
 	});
 };

@@ -13,7 +13,8 @@
 		<%= candidates[i].user_name %><br />
 		<%= candidates[i].text %><br />
 		RT : <%= candidates[i].rt_count %>　　RT by :<%= candidates[i].rt_user %><br />
-		<a href = 'rtFromCandidates/<%= candidates[i].id %>' target = '_blank'>リツイート</a><br />
+		<a href = 'rtFromCandidatesById/<%= candidates[i].id %>' target = '_blank'>リツイート</a>　
+		<a href = 'setDeleted/<%= candidates[i].id %>' target = '_blank'>削除</a><br />
 <br />
 <br />
 	<%

@@ -21,14 +21,15 @@ exports.sendmail = function(req, res) {
 	res.send("done.");
 }
 
+exports.setDeleted = function(req, res) {
+	var tweet_id = String(req.params.tweet_id);
+	rt_candidate_model.setDeleted(tweet_id);
+	res.send("delete done.");
+}
+
 exports.demo = function(req, res) {
 	twAccessor.demo();
-	/*
-	var retweet_model = require('../models/retweet_model');
-	retweet_model.getRecentRetweets(100, function(result) {
-		console.log(result);
-	});
-*/
+
 	res.send("done.");
 }
 
@@ -36,6 +37,23 @@ exports.dbdemo = function(req, res) {
 	res.send("done.");
 }
 
+exports.rtFromCandidates = function(req, res) {
+	rt_candidate_model.getTodaysCandidates(function(results) {
+		var candidates = results;
+
+		twAccessor.pickupRtFromNotFollows(candidates, function(rt_success_tweets) {
+			console.log(rt_success_tweets);
+			for(var i in rt_success_tweets) {
+				retweet_model.save(rt_success_tweets[i]);
+				rt_candidate_model.setDeleted(rt_success_tweets[i].id);
+			}
+		});
+	});
+
+	res.send("done.");
+}
+
+exports.rtFromCandidatesById = rtFromCandidatesById;
 
 /**
  * アクション
@@ -55,7 +73,7 @@ function rtTweets(req, res){
 			twAccessor.rtTweets(function(rt_success_tweets, rt_candidates) {
 				for(var i in rt_success_tweets) {
 					retweet_model.save(rt_success_tweets[i]);
-					console.log('retweet saved.');
+					//console.log('retweet saved.');
 				}
 
 				for(var i in rt_candidates) {
@@ -133,12 +151,12 @@ function showRecentRetweets(req, res){
 };
 
 
-exports.rtFromCandidates = rtFromCandidates;
+
 
 /**
  * アクション
  */
-function rtFromCandidates(req, res) {
+function rtFromCandidatesById(req, res) {
 	var tweet_id = String(req.params.tweet_id);
 
 	twAccessor.retweetById(tweet_id, function(){
@@ -152,7 +170,7 @@ function rtFromCandidates(req, res) {
 		}
 
 		retweet_model.save(tweet);
-		rt_candidate_model.removeById(tweet_id);
+		rt_candidate_model.setDeleted(tweet_id);
 		res.send("done.");
 	});
 }
