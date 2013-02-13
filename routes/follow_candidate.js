@@ -2,7 +2,7 @@
  *
  *
  */
-var twAccessor = require('../models/twitterAccessor');
+var twAccessor = require('../models/twitter_accessor');
 var candidate_model = require('../models/follow_candidate');
 var models = require('../models');
 
