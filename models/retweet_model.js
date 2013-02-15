@@ -17,6 +17,37 @@ exports.remove = remove;
 exports.getTodaysRetweets = getTodaysRetweets;
 exports.getRecentRetweets = getRecentRetweets;
 
+/*
+exports.setDbParams= function(config) {
+	db_params = config;
+	connect();
+}
+
+var db_params = {
+		host: '',
+		name: ''
+}
+
+
+function connect(){
+	try {
+		mongoose.connect('mongodb://' + db_params.host + '/' + db_params.name );
+	} catch (e) {
+		console.log(e);
+	}
+}
+*/
+
+// signal 飛んできたら閉じる
+process.on('SIGINT', function() {
+	try {
+		mongoose.disconnect();
+	} catch (e) {
+		console.log(e);
+	}
+});
+
+
 /**
  * スキーマ定義
  */

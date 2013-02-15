@@ -20,24 +20,10 @@ exports.removeById = removeById;
 exports.getTodaysCandidates = getTodaysCandidates;
 exports.setDeleted = setDeleted;
 
+
 /**
  * スキーマ定義
  */
-/*
-var schema = new mongoose.Schema({
-	id:        { type: String, required: true },
-	user_id:   { type: Number, required: true },
-	user_name: { type: String, required: true },
-	text:      { type: String, required: true },
-	rt_count:  { type: Number},
-	rt_user:   { type: String, required: false },
-	posted:    { type: Date},
-	created:   { type: Date}
-});
-*/
-
-// id → id_str にする場合は 下の関数のidも変更すべき
-
 var schema = new mongoose.Schema({
 	id:          { type: String, required: true },
 	user_id:     { type: String, required: true },
@@ -50,27 +36,23 @@ var schema = new mongoose.Schema({
 	rt_user:     { type: String},
 	is_deleted:  { type: Boolean, default: false}
 });
-/*
-var schema = new mongoose.Schema({
-	id_str:   { type: String, required: true },
-	text:     { type: String, required: true },
-	rt_count: { type: Number, required: true },
-	posted:   { type: Date, required: true },
-	created:  { type: Date, required: true },
-	rt_user:  { type: String, required: false },
-	user: {
-		id_str:  { type: String, required: true },
-		name:  { type: String, required: true },
-		screen_name:  { type: String, required: false }//,
-		//is_friend: { type: Boolean, required: false }
-	}
-});
-*/
+
 
 // コレクション名、スキーマ
 mongoose.model('rt_candidate', schema);
 // モデル
 var RtCandidateModel = mongoose.model('rt_candidate');
+
+/**
+ * signal 飛んできたら閉じる
+ */
+process.on('SIGINT', function() {
+	try {
+		mongoose.disconnect();
+	} catch (e) {
+		console.log(e);
+	}
+});
 
 /**
  * 削除
@@ -222,8 +204,6 @@ function getRecents(limit, callback) {
 	if (!limit) {
 		limit = 100;
 	}
-
-	//console.log(new Date());
 
 	RtCandidateModel
 	.find({})

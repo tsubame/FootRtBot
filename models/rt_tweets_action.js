@@ -26,7 +26,11 @@ var should_rt_tweets = {};
 var rt_success_tweets = [];
 var rt_candidates = {};
 
-var rt_base_count = 30;
+var rt_base_count = CONST.BASE_RT_COUNT;
+
+exports.setRtBaseCount = function(count) {
+	rt_base_count = count;
+}
 
 /**
  * 処理実行
@@ -35,6 +39,9 @@ var rt_base_count = 30;
  *
  */
 function exec() {
+	tw.setAccount(CONST.ACCOUNT.WATCH_TL);
+
+
 	async.series([
 		function(callback) {
 			// 自分の最近のRTを取得
@@ -57,7 +64,7 @@ function exec() {
 			pickupShouldRtTweets(callback);
 		},
 		function(callback) {
-			//tw.setAccount(CONST.ACCOUNT.TWEET);
+			tw.setAccount(CONST.ACCOUNT.TWEET);
 			retweetAtOnce(callback);
 		},
 		function(callback) {
@@ -78,25 +85,18 @@ function exec() {
 			throw err;
 		} else {
 			console.log('finished!');
-			//close();
-			console.log('RT候補');
-			console.log(rt_candidates);
 		}
 	});
 }
 
 
 function pickupShouldRtTweets(callback) {
-
 	var end_count    = 0;
-	var tweets_count = 0;
 
-	for (var id in many_rt_tweets) {
-		tweets_count ++;
-	}
-
-	for (var id in many_rt_tweets) {
-		var tweet = many_rt_tweets[id];
+	for (var i = 0; i < many_rt_tweets.length; i++) {
+	//for (var i = many_rt_tweets.length - 1; 0 <= i; i--) {
+		var tweet = many_rt_tweets[i];
+		var id = tweet.id;
 
 		if (recent_retweets[id]) {
 			end_count++;
@@ -105,23 +105,16 @@ function pickupShouldRtTweets(callback) {
 
 		if (tweet.is_friend_tweet == false) {
 			rt_candidates[id] = tweet;
-			//console.log(tweet);
 		} else {
 			should_rt_tweets[id] = tweet;
 		}
 
 		end_count++;
-		//console.log(end_count);
 	}
 
 	var intId = setInterval(function() {
-		//console.log(end_count);
-		console.log(tweets_count);
-		if(end_count == tweets_count) {
+		if(end_count == many_rt_tweets.length) {
 			clearInterval(intId);
-			//console.log('pickup finished!');
-
-
 			callback();
 		}
 	}, 500);
@@ -155,7 +148,6 @@ function retweetAtOnce(callback) {
 	var intId = setInterval(function() {
 		if(end_count == tweet_count) {
 			clearInterval(intId);
-			//console.log('retweets end.');
 			callback();
 		}
 

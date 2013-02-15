@@ -269,7 +269,8 @@ exports.pickupRtFromTl = pickupRtFromTl;
 function pickupRtFromTl(pickup_rt_count, callback) {
 	var req_end_count = 0;
 	var req_count = Math.ceil(get_tl_count / get_tl_count_once);
-	var retweets = {};
+	//var retweets = {};
+	var retweets = [];
 
 	// 複数回リクエスト
 	for (var n = 1; n <= req_count; n++) {
@@ -284,7 +285,8 @@ function pickupRtFromTl(pickup_rt_count, callback) {
 					var id = tweet.id;
 					// RT数が一定以上なら保存
 					if (pickup_rt_count <= tweet.rt_count) {
-						retweets[id] = tweet;
+						//retweets[id] = tweet;
+						retweets.push(tweet);
 					}
 				});
 			}
@@ -404,6 +406,7 @@ function retweet(tweet_id, callback) {
  *
  * @var function callback
  */
+/*
 function pickupRtFromNotFollows(recent_candidates, callback) {
 	initArray();
 
@@ -416,7 +419,6 @@ function pickupRtFromNotFollows(recent_candidates, callback) {
 	    	getMyFollowsByIds(cb);
 		},
 		function(cb) {
-			//console.log(recent_candidates);
 			for (var i = 0; i < recent_candidates.length; i++) {
 				var tweet = recent_candidates[i];
 				if (skip_rt_count < tweet.rt_count) {
@@ -430,7 +432,6 @@ function pickupRtFromNotFollows(recent_candidates, callback) {
 			}
 
 			var intId = setInterval(function() {
-				//console.log(end_count);
 				if(end_count == recent_candidates.length) {
 					clearInterval(intId);
 					cb();
@@ -448,7 +449,7 @@ function pickupRtFromNotFollows(recent_candidates, callback) {
 		}
 	});
 }
-
+*/
 
 /**
  * 特定のユーザがフォローしているユーザのIDを取得
@@ -499,6 +500,7 @@ function getMyFriendIds(callback) {
  *
  * @var function callback
  */
+/*
 function getMyFollowsByIds(callback) {
 	var url = 'https://api.twitter.com/1.1/friends/ids.json?screen_name=' + MY_TRUE_ACCOUNT;
 
@@ -520,13 +522,12 @@ function getMyFollowsByIds(callback) {
 		callback(my_follows);
 	});
 }
-
-
-
+*/
 
 /**
  *
  */
+/*
 function rtFromCandidate(tweet, callback) {
 	getRtUserIds(tweet.id, function(rt_user_ids) {
 		var match_user_count = 0;
@@ -535,7 +536,6 @@ function rtFromCandidate(tweet, callback) {
 		for (var i in rt_user_ids) {
 			rt_user_count++;
 		}
-		//console.log(rt_user_count + '人がRT');
 
 		// フレンドの件数ループ
 		for (var friend_id in my_follows) {
@@ -555,6 +555,7 @@ function rtFromCandidate(tweet, callback) {
 		}
 	});
 }
+*/
 
 exports.getRtUserIds = getRtUserIds;
 

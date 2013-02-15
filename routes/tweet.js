@@ -4,42 +4,24 @@
  */
 var retweet_model      = require('../models/retweet_model')
   , rt_candidate_model = require('../models/rt_candidate_model')
-  , tw =  require('../models/twitter_accessor')
-  , CONST = require('../etc/const');
+  , tw                 = require('../models/twitter_accessor')
+  , CONST              = require('../etc/const');
+
 
 /**
  * exports.
  */
 exports.rtTweets = rtTweets;
-
-exports.sendRtMail = sendRtMail;
-
 exports.rtFromCandidates = rtFromCandidates;
-
 exports.rtManually = rtManually;
 
+exports.sendRtMail = sendRtMail;
 exports.showCandidates = showCandidates;
-
 exports.showRecentRetweets = showRecentRetweets;
-
 exports.deleteCandidate = deleteCandidate;
 
-exports.demo = function(req, res) {
-	console.log('end.');
+exports.demo = demo;
 
-	var CONST = require('../etc/const');
-	var tw =  require('../models/twitter_accessor');
-	tw.setAccount(CONST.ACCOUNT.TWEET);
-	tw.demo();
-
-	res.send("done.");
-}
-
-function heavyProcess() {
-	for (var i = 0; i < 1000; i++) {
-		console.log(i);
-	}
-}
 
 /**
  * アクション
@@ -62,9 +44,7 @@ function deleteCandidate(req, res) {
 	var tweet_id = String(req.params.tweet_id);
 	rt_candidate_model.setDeleted(tweet_id);
 
-	setTimeout(function() {
-		showCandidates(req, res);
-	}, 500);
+	res.send("done.");
 }
 
 
@@ -75,18 +55,6 @@ function deleteCandidate(req, res) {
  *
  */
 function rtFromCandidates(req, res) {
-	/*
-	rt_candidate_model.getTodaysCandidates(function(results) {
-		var candidates = results;
-
-		tw.pickupRtFromNotFollows(candidates, function(rt_success_tweets) {
-			for(var i in rt_success_tweets) {
-				retweet_model.save(rt_success_tweets[i]);
-				rt_candidate_model.setDeleted(rt_success_tweets[i].id);
-			}
-		});
-	});
-	*/
 	var action = require('../models/rt_from_candidates_action');
 
 	action.exec();
@@ -96,6 +64,7 @@ function rtFromCandidates(req, res) {
 
 /**
  * アクション
+ *
  * 最近のRTを表示
  */
 function showRecentRetweets(req, res){
@@ -126,15 +95,14 @@ function showCandidates(req, res){
 function rtManually(req, res) {
 	var tweet_id = String(req.params.tweet_id);
 
-	tw.setAccount(CONST.ACCOUNT.WATCH_TL);
+	tw.setAccount(CONST.ACCOUNT.TWEET);
 	tw.retweet(tweet_id, function(tweet){
-		console.log(tweet);
-		retweet_model.save(tweet);
-		rt_candidate_model.setDeleted(tweet_id);
+		if (tweet) {
+			retweet_model.save(tweet);
+			rt_candidate_model.setDeleted(tweet_id);
+		}
 
-		setTimeout(function() {
-			showCandidates(req, res);
-		}, 500);
+		res.send("done.");
 	});
 }
 
@@ -149,3 +117,12 @@ function sendRtMail(req, res) {
 	res.send("done.");
 }
 
+/**
+ * デモコード
+ */
+function demo(req, res) {
+	tw.setAccount(CONST.ACCOUNT.TWEET);
+	tw.demo();
+
+	res.send("done.");
+}

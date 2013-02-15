@@ -52,10 +52,8 @@ function exec() {
 		},
 		function(cb) {
 			//
-	    	//tw.setAccount(CONST.ACCOUNT.TWEET);
+	    	tw.setAccount(CONST.ACCOUNT.TWEET);
 			pickupRtTweets(cb);
-			//console.log(candidates);
-			//cb();
 		}
 	],
 	function(err, results) {
@@ -82,13 +80,9 @@ function pickupRtTweets(callback) {
 			console.log('スキップしました RT:' + tweet.rt_count);
 			continue;
 		}
-// バグあり
-// tweetがうまく取得できない
-		//var id = tweet.id;
 
 		tw.getRtUserIds(tweet, function(rt_user_ids, _tweet) {
 			var match_user_count = 0;
-//console.log(id);
 			// フレンドの件数ループ
 			for (var friend_id in my_friends) {
 				if (rt_user_ids[friend_id]) {

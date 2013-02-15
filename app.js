@@ -1,15 +1,13 @@
 /**
  * Module dependencies.
  */
-
 var express = require('express')
   , routes  = require('./routes')
+  , http    = require('http')
+  , path    = require('path')
   , tweet   = require('./routes/tweet')
-  , follow_candidate = require('./routes/follow_candidate')
-  , models = require('./models')
-  , http   = require('http')
-  , path   = require('path')
-  , OAuth  = require('oauth').OAuth;
+  , db_init = require('./models/db_init')
+  , CONST   = require('./etc/const');
 
 var app = express();
 
@@ -27,12 +25,12 @@ app.configure(function(){
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
-  app.use(express.cookieParser('your secret here'));
+  app.use(express.cookieParser('secret cokkie'));
   app.use(express.session());
   app.use(app.router);
   app.use(express.static(path.join(__dirname, 'public')));
 
-  models.init();
+  db_init.connect(CONST.DB_PARAMS);
 });
 
 app.configure('development', function(){
@@ -40,6 +38,7 @@ app.configure('development', function(){
 	app.use(express.errorHandler());
 });
 
+// アカウントの設定
 
 
 
@@ -48,7 +47,9 @@ app.configure('development', function(){
  * ルーティング
  *
  */
-app.get('/', routes.index);
+app.get('/', function(req, res){
+	  res.render('index', { title: 'Express' });
+});
 
 app.get('/tweet/rtTweets', tweet.rtTweets);
 app.get('/tweet/showCandidates', tweet.showCandidates);
@@ -59,14 +60,14 @@ app.get('/tweet/deleteCandidate/:tweet_id', tweet.deleteCandidate);
 app.get('/tweet/sendRtMail', tweet.sendRtMail);
 app.get('/tweet/demo', tweet.demo);
 
-// 削除
-//app.get('/tweet/sendmail', tweet.sendmail);
 
+/*
 app.get('/follow_candidate/update', follow_candidate.update);
 app.get('/follow_candidate/show', follow_candidate.show);
 app.get('/follow_candidate/follow/:screen_name', function(req, res) {
 	follow_candidate.follow(req, res);
 });
+*/
 
 app.get('/demo', function(req, res) {
 	res.render('demo', {title: 'layout'});
