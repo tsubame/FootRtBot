@@ -1,10 +1,10 @@
-/**
- *
- * TwitterAPIを利用するためのモジュール
- *
- *
- *
- */
+//=================================================================
+//
+// TwitterAPIを利用するためのモジュール
+//
+//
+//
+//=================================================================
 
 /**
  * Module dependencies.
@@ -16,27 +16,25 @@ var OAuth = require('oauth').OAuth
 /**
  * exports.
  */
-//exports.rtTweets = rtTweets;
-
-exports.getFollowCandidate = getFollowCandidate;
+exports.setAccount = setAccount;
 
 exports.retweet = retweet;
 
-exports.showRtUserIds = getRtUserIds;
+exports.getMyTimeLine = getMyTimeLine;
+
+exports.pickupRtFromTl = pickupRtFromTl;
+
+exports.getFriendIds = getFriendIds;
+
+exports.getMyFriendIds = getMyFriendIds;
+
+exports.getRtUserIds = getRtUserIds;
 
 exports.demo = function() {
-	//setAccount(account_for_watch_tl);
-
 	retweet({aa: 11}, function() {
 		console.log();
 	});
-
-/*
-	getMyTimeLine(function(tweets) {
-		console.log(tweets);
-	});*/
 }
-
 
 
 /**
@@ -49,26 +47,32 @@ var REQUEST_TOKEN_URL   = 'https://api.twitter.com/oauth/request_token';
  */
 var ACCESS_TOKEN_URL    = 'https://api.twitter.com/oauth/access_token';
 
+/**
+ * TLから取得するツイートの数
+ */
 var get_tl_count = 500;
 
 exports.setGetTlCount = function(count) {
 	get_tl_count = count;
 }
 
+/**
+ * TLから一度に取得するツイートの数
+ */
 var get_tl_count_once = 200;
 
 exports.setGetTlCountOnce = function(count) {
 	get_tl_count_once = count;
 }
 
-var oauth_callback_url = 'http://127.0.0.1/';
+/**
+ * OAuth認証コールバックURL
+ */
+var oauth_callback_url = 'http://127.0.0.1:3000/';
 
 exports.setOAuthCallBackUrl = function(url) {
 	oauth_callback_url = url;
 }
-
-
-
 
 /**
  * OAuthオブジェクト
@@ -88,7 +92,6 @@ var account = {
 	access_token_secret: ''
 };
 
-exports.setAccount = setAccount;
 
 /**
  * アカウントをセット
@@ -102,79 +105,9 @@ function setAccount(_account) {
 	  account.consumer_key,
 	  account.consumer_secret,
 	  '1.0',
-	  oauth_callback_url,// コールバックのアドレス
+	  oauth_callback_url,
 	  'HMAC-SHA1'
 	);
-}
-
-
-
-/**
- * 必要な関数
- *
- *
- * ・特定のユーザの最近のツイートを取得
- * ・TLから特定のRT数以上のものを取り出す
- * ・リツイート
- * ・twitter APIにアクセス
- *
- */
-
-
-/**
- * 特定のユーザの最近のツイートを200件取得
- *
- * 連想配列tweetsに取得する
- * 添字はツイートID
- *
- * @var String screen_name
- * @var function callback(tweets)
- */
-function getUserTimeline(screen_name, callback) {
-
-	var tweets = {};
-
-	var url = 'https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&screen_name=' + screen_name;
-	accessApiWithGet(url, function(json_string) {
-		var json_datas = JSON.parse(json_string);
-		// ツイートの件数ループ
-		for (var i in json_datas) {
-			// RTされたツイートならretweeted_statusを取り出す
-			if (json_datas[i].retweeted_status) {
-				var tweet_data = json_datas[i].retweeted_status;
-			} else {
-				var tweet_data = json_datas[i];
-			}
-
-			var id = tweet_data.id_str;
-
-			var tweet = {
-				id: 	   tweet_data.id_str,
-				user_id:   tweet_data.user.id_str,
-				user_name: tweet_data.user.name,
-				text:      tweet_data.text,
-				rt_count:  tweet_data.retweet_count,
-				posted:    tweet_data.created_at
-			};
-			tweets[id] = tweet;
-		}
-
-		callback(tweets);
-	});
-}
-
-exports.getMyTimeLine = getMyTimeLine;
-
-/**
- * 自分の最近のツイートを200件取得
- *
- * 連想配列tweetsに取得する
- * 添字はツイートID
- *
- * @var function callback(tweets)
- */
-function getMyTimeLine(callback) {
-	getUserTimeline(account.screen_name, callback);
 }
 
 /**
@@ -236,7 +169,58 @@ function accessApiWithPost(url, callback) {
 	);
 }
 
-exports.pickupRtFromTl = pickupRtFromTl;
+/**
+ * 特定のユーザの最近のツイートを200件取得
+ *
+ * 連想配列tweetsに取得する
+ * 添字はツイートID
+ *
+ * @var String screen_name
+ * @var function callback(tweets)
+ */
+function getUserTimeline(screen_name, callback) {
+	var tweets = {};
+
+	var url = 'https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&screen_name=' + screen_name;
+	accessApiWithGet(url, function(json_string) {
+		var json_datas = JSON.parse(json_string);
+		// ツイートの件数ループ
+		for (var i in json_datas) {
+			// RTされたツイートならretweeted_statusを取り出す
+			if (json_datas[i].retweeted_status) {
+				var tweet_data = json_datas[i].retweeted_status;
+			} else {
+				var tweet_data = json_datas[i];
+			}
+
+			var id = tweet_data.id_str;
+
+			var tweet = {
+				id: 	   tweet_data.id_str,
+				user_id:   tweet_data.user.id_str,
+				user_name: tweet_data.user.name,
+				text:      tweet_data.text,
+				rt_count:  tweet_data.retweet_count,
+				posted:    tweet_data.created_at
+			};
+			tweets[id] = tweet;
+		}
+
+		callback(tweets);
+	});
+}
+
+/**
+ * 自分の最近のツイートを200件取得
+ *
+ * 連想配列tweetsに取得する
+ * 添字はツイートID
+ *
+ * @var function callback(tweets)
+ */
+function getMyTimeLine(callback) {
+	getUserTimeline(account.screen_name, callback);
+}
 
 
 // 1と1.1どっちが良い？
@@ -248,28 +232,10 @@ exports.pickupRtFromTl = pickupRtFromTl;
  * @var Number   get_tl_count    TLから取得するツイートの数
  * @var function callback(rt_tweets)
  * @see models.retweets
- *
- * 				rt_tweets = {
- * 					'ツイートID':
- * 					{
- *						id: 	     ツイートID
- *						user_id:     ユーザID
- *						user_name:   ユーザ名
- *						user_s_name: ユーザ名（@～ の後）
- *						text:        テキスト
- *						rt_count:    RT数
- *						posted:      投稿日時
- *						created:     現在日時
- *						is_friend_tweet: フォローしているユーザのツイートか
- *						rt_user:     RTしたユーザの名前
- *						is_deleted:  削除する際に使用
- *					}
- *				};
  */
 function pickupRtFromTl(pickup_rt_count, callback) {
 	var req_end_count = 0;
 	var req_count = Math.ceil(get_tl_count / get_tl_count_once);
-	//var retweets = {};
 	var retweets = [];
 
 	// 複数回リクエスト
@@ -279,13 +245,11 @@ function pickupRtFromTl(pickup_rt_count, callback) {
 
 		accessApiWithGet(url, function(json_string) {
 			var json_datas = JSON.parse(json_string);
-			// ツイートの件数ループ
 			for (var i in json_datas) {
 				tweetJsonToObject(json_datas[i], function(tweet) {
 					var id = tweet.id;
 					// RT数が一定以上なら保存
 					if (pickup_rt_count <= tweet.rt_count) {
-						//retweets[id] = tweet;
 						retweets.push(tweet);
 					}
 				});
@@ -303,11 +267,22 @@ function pickupRtFromTl(pickup_rt_count, callback) {
 	}, 500);
 }
 
-
-// 上にまとめたほうがいい？
 /**
- * ツイートのJSONデータをオブジェクトに
+ * ツイートのJSONデータをオブジェクトに変換
  *
+ * 				tweet = {
+ *						id: 	     ツイートID
+ *						user_id:     ユーザID
+ *						user_name:   ユーザ名
+ *						user_s_name: ユーザ名（@～ の後）
+ *						text:        テキスト
+ *						rt_count:    RT数
+ *						posted:      投稿日時
+ *						created:     現在日時
+ *						is_friend_tweet: フォローしているユーザのツイートか
+ *						rt_user:     RTしたユーザの名前
+ *						is_deleted:  削除する際に使用
+ *					}
  */
 function tweetJsonToObject(json_data, callback) {
 	// RTされたツイートならretweeted_statusを取り出す
@@ -368,89 +343,6 @@ function retweet(tweet_id, callback) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**
- * 配列の初期化
- *
- */
-
-
-
-
-/**
- * RT候補から
- * リツイートすべきものを抽出してRT
- *
- * @var function callback
- */
-/*
-function pickupRtFromNotFollows(recent_candidates, callback) {
-	initArray();
-
-	var skip_rt_count = 1000;
-	var end_count = 0;
-
-	async.series([
-	    function(cb) {
-	    	// 自分のフォローを取得
-	    	getMyFollowsByIds(cb);
-		},
-		function(cb) {
-			for (var i = 0; i < recent_candidates.length; i++) {
-				var tweet = recent_candidates[i];
-				if (skip_rt_count < tweet.rt_count) {
-					end_count ++;
-					console.log('スキップしました RT:' + tweet.rt_count);
-					continue;
-				}
-				rtFromCandidate(tweet, function() {
-					end_count ++;
-				});
-			}
-
-			var intId = setInterval(function() {
-				if(end_count == recent_candidates.length) {
-					clearInterval(intId);
-					cb();
-				}
-			}, 500);
-		}
-	],
-	function(err, results) {
-		if(err) {
-			throw err;
-		} else {
-			console.log('finished!');
-
-			callback(rt_success_tweets);
-		}
-	});
-}
-*/
-
 /**
  * 特定のユーザがフォローしているユーザのIDを取得
  * 100件以上取得できる
@@ -478,7 +370,6 @@ function getFriendIds(screen_name, callback) {
 	});
 }
 
-exports.getMyFriendIds = getMyFriendIds;
 
 /**
  * 自分がフォローしているユーザのIDを取得
@@ -493,76 +384,10 @@ function getMyFriendIds(callback) {
 }
 
 
-
-/**
- * 自分がフォローしているユーザのIDを取得
- * 100件以上取得できる
- *
- * @var function callback
- */
-/*
-function getMyFollowsByIds(callback) {
-	var url = 'https://api.twitter.com/1.1/friends/ids.json?screen_name=' + MY_TRUE_ACCOUNT;
-
-	var my_follows;
-
-	accessApiWithGet(url, function(data) {
-		var results = JSON.parse(data);
-		var ids = results.ids;
-
-        for (var i in ids) {
-        	var id = String(ids[i]);
-			my_follows[id] = {
-				id: id
-			}
-
-			//my_follow_count ++;
-		}
-
-		callback(my_follows);
-	});
-}
-*/
-
-/**
- *
- */
-/*
-function rtFromCandidate(tweet, callback) {
-	getRtUserIds(tweet.id, function(rt_user_ids) {
-		var match_user_count = 0;
-
-		var rt_user_count = 0;
-		for (var i in rt_user_ids) {
-			rt_user_count++;
-		}
-
-		// フレンドの件数ループ
-		for (var friend_id in my_follows) {
-			if (rt_user_ids[friend_id]) {
-				console.log(friend_id + 'がRTしています。');
-				match_user_count ++;
-			}
-		}
-
-		if (2 <= match_user_count) {
-			// リツイート
-			retweet(tweet, function() {
-				callback();
-			});
-		} else {
-			callback();
-		}
-	});
-}
-*/
-
-exports.getRtUserIds = getRtUserIds;
-
 /**
  * ツイートをRTした人のIDを取得
  *
- * API 1
+ * API 1を使用
  */
 function getRtUserIds(tweet, callback) {
 
@@ -631,170 +456,6 @@ function getRtUserIds(tweet, callback) {
 
 
 
-
-
-
-
-
-/**
- * フォローする候補を取得
- *
- * @var function callback
- */
-function getFollowCandidate(callback) {
-
-	async.series([
-		function(cb) {
-			getMyFollowsByIds(cb);
-		},
-		function(cb) {
-	    	getFollowsOfMyFollows(cb);
-	    }
-	],
-	function(err, results) {
-		if(err) {
-			throw err;
-		} else {
-			console.log('success!');
-			callback(follow_candidates);
-		}
-	});
-}
-
-/**
- * 特定のユーザがフォローしている人を取得
- *
- * @var screen_name Twitterのアカウント @abcなどの@以降
- * @var function callback
- */
-function getFollows(id_str, callback) {
-	var users = [];
-
-	//var url = 'http://api.twitter.com/1/statuses/friends.json?screen_name=' + screen_name;
-	var url = 'http://api.twitter.com/1/statuses/friends.json?id=' + id_str;
-
-	accessApi(url, function(data) {
-		var results = JSON.parse(data);
-		console.log(results.length + '件のアカウントを取得')
-
-        for (var i in results) {
-        	var id = results[i].id_str;
-
-			users[id] = {
-				id: results[i].id,
-				id_str: results[i].id_str,
-				name: results[i].name,
-				screen_name: results[i].screen_name,
-				followed_count: 1
-			}
-		}
-
-		callback(users);
-	});
-}
-
-/**
- * 特定のユーザがフォローしている人を取得
- *
- * @var String id_str Twitterのアカウント @abcなどの@以降
- * @var function callback
- */
-function getFollowsById(id_str, callback) {
-	var users = [];
-
-	var url = 'http://api.twitter.com/1/statuses/friends.json?id=' + id_str;
-
-	accessApi(url, function(data) {
-		var results = JSON.parse(data);
-		console.log(results.length + '件のアカウントを取得')
-
-        for (var i in results) {
-        	var id = results[i].id_str;
-
-			users[id] = {
-				id: results[i].id,
-				id_str: results[i].id_str,
-				name: results[i].name,
-				screen_name: results[i].screen_name,
-				followed_count: 1
-			}
-		}
-
-		callback(users);
-	});
-}
-
-/**
- * 自分がフォローしているユーザを取得
- * my_followsに取得する
- *
- * @var function callback
- */
-function getMyFollows(callback) {
-	var url = 'http://api.twitter.com/1/statuses/friends.json?screen_name=' + MY_ACCOUNT;
-
-	// 100件以上取れない
-	accessApi(url, function(data) {
-		var results = JSON.parse(data);
-		//console.log(results);
-        for (var i in results) {
-        	var id = results[i].id_str;
-
-			my_follows[id] = {
-				id: results[i].id,
-				id_str: results[i].id_str,
-				name: results[i].name,
-				screen_name: results[i].screen_name
-			}
-
-			my_follow_count ++;
-		}
-
-		callback(my_follows);
-	});
-}
-
-
-/**
- * 自分がフォローしているユーザのフォローを取得
- * follow_candidatesに取得する
- *
- * @var function callback
- */
-function getFollowsOfMyFollows(callback) {
-	var end_count = 0;
-
-	// 自分がフォローしている件数ループ
-	for(var id_str in my_follows) {
-		getFollows(id_str, function(users) {
-			for (var i in users) {
-				var user =  users[i];
-				var key = user.id_str;
-
-				if (my_follows[key]) {
-					console.log('　フォロー済み：' + user.name);
-					continue;
-				}
-
-				if (follow_candidates[key]) {
-					follow_candidates[key].followed_count ++;
-				} else {
-					follow_candidates[key] = user;
-				}
-			}
-
-			end_count++;
-		});
-	}
-
-	var intId = setInterval(function() {
-		if(end_count == my_follow_count) {
-			clearInterval(intId);
-			callback();
-		}
-
-	}, 500);
-}
 
 
 

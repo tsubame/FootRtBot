@@ -20,8 +20,8 @@ for(var i in candidates) {
 	<%= candidates[i].user_name %><br />
 	<%= candidates[i].text %><br />
 	RT : <%= candidates[i].rt_count %>　　RT by :<%= candidates[i].rt_user %><br />
-	<!-- <a href = 'rtManually/<%= candidates[i].id %>'>リツイート</a>　
-	<a href = 'deleteCandidate/<%= candidates[i].id %>'>削除</a>
+	<!-- <a href = 'rt_manually/<%= candidates[i].id %>'>リツイート</a>　
+	<a href = 'delete<%= candidates[i].id %>'>削除</a>
 	-->
 	<input type = 'button' class = 'retweetCandidateButton' name = '<%= candidates[i].id %>' value = 'リツイート' /><br />
 

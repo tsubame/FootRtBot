@@ -123,7 +123,7 @@ $(function() {
 
 		//jQuery("tr#tr" + siteId).hide();
 		$("div#candidate_" + site_id).hide();
-		var url = './rtManually/' + site_id;
+		var url = './rt_manually/' + site_id;
 		// POSTでデータ送信
 		$.get(url);
 	});
@@ -141,7 +141,7 @@ $(function() {
 
 		//jQuery("tr#tr" + siteId).hide();
 		$("div#candidate_" + site_id).hide();
-		var url = './deleteCandidate/' + site_id;
+		var url = './delete/' + site_id;
 		// POSTでデータ送信
 		$.get(url);
 	});

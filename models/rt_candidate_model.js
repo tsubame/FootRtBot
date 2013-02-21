@@ -175,6 +175,11 @@ function save(tweet) {
 	});
 };
 
+/**
+ * なければ保存
+ *
+ * @var obj tweet
+ */
 function saveIfNotExist(tweet) {
 	var model = new RtCandidateModel(tweet);
 
@@ -188,7 +193,6 @@ function saveIfNotExist(tweet) {
 			if (0 == result.length) {
 				save(tweet);
 			}
-			//console.log(result);
 		}
 	});
 };
@@ -228,7 +232,6 @@ function getRecents(limit, callback) {
  *
  */
 function getTodaysCandidates(callback) {
-	//console.log(new Date());
 	var mts = new Date().getTime();
 	var ts = mts / 1000;
 	var yesterdayTs = ts - 86400;

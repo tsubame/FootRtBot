@@ -2,10 +2,12 @@
  * Module dependencies.
  */
 var express = require('express')
-  , routes  = require('./routes')
+  //, routes  = require('./routes')
   , http    = require('http')
   , path    = require('path')
-  , tweet   = require('./routes/tweet')
+  //, tweet   = require('./routes/tweet')
+  , retweet   = require('./routes/retweet')
+  , rt_candidate   = require('./routes/rt_candidate')
   , db_init = require('./models/db_init')
   , CONST   = require('./etc/const');
 
@@ -38,41 +40,30 @@ app.configure('development', function(){
 	app.use(express.errorHandler());
 });
 
-// アカウントの設定
-
-
-
-
 /**
  * ルーティング
  *
  */
+
 app.get('/', function(req, res){
-	  res.render('index', { title: 'Express' });
+	  res.render('index', { title: '' });
 });
 
-app.get('/tweet/rtTweets', tweet.rtTweets);
-app.get('/tweet/showCandidates', tweet.showCandidates);
-app.get('/tweet/showRecentRetweets', tweet.showRecentRetweets);
-app.get('/tweet/rtFromCandidates', tweet.rtFromCandidates);
-app.get('/tweet/rtManually/:tweet_id', tweet.rtManually);
-app.get('/tweet/deleteCandidate/:tweet_id', tweet.deleteCandidate);
-app.get('/tweet/sendRtMail', tweet.sendRtMail);
-app.get('/tweet/demo', tweet.demo);
+app.get('/rt_candidate/show', rt_candidate.showCandidates);
+app.get('/rt_candidate/rt_auto', rt_candidate.rtFromCandidates);
+app.get('/rt_candidate/rt_manually/:tweet_id', rt_candidate.rtManually);
+app.get('/rt_candidate/delete/:tweet_id', rt_candidate.deleteCandidate);
+
+app.get('/retweet/show',       retweet.showRecentRetweets);
+app.get('/retweet/rt_from_tl', retweet.rtTweets);
+app.get('/retweet/sendmail',   retweet.sendRtMail);
+app.get('/retweet/demo',       retweet.demo);
 
 
 /*
 app.get('/follow_candidate/update', follow_candidate.update);
 app.get('/follow_candidate/show', follow_candidate.show);
-app.get('/follow_candidate/follow/:screen_name', function(req, res) {
-	follow_candidate.follow(req, res);
-});
 */
-
-app.get('/demo', function(req, res) {
-	res.render('demo', {title: 'layout'});
-});
-
 
 http.createServer(app).listen(app.get('port'), function(){
 	console.log("Express server listening on port " + app.get('port'));

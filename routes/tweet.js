@@ -38,33 +38,6 @@ function rtTweets(req, res){
 /**
  * アクション
  *
- * RT候補のツイートに削除マークを付ける
- */
-function deleteCandidate(req, res) {
-	var tweet_id = String(req.params.tweet_id);
-	rt_candidate_model.setDeleted(tweet_id);
-
-	res.send("done.");
-}
-
-
-/**
- * アクション
- *
- * RT候補のうちフォローしたユーザが2人以上RTしているものをリツイート
- *
- */
-function rtFromCandidates(req, res) {
-	var action = require('../models/rt_from_candidates_action');
-
-	action.exec();
-	res.send("done.");
-}
-
-
-/**
- * アクション
- *
  * 最近のRTを表示
  */
 function showRecentRetweets(req, res){
@@ -72,19 +45,6 @@ function showRecentRetweets(req, res){
 		res.render('show_recent_rts', { retweets: recent_retweets });
 	});
 };
-
-
-/**
- * アクション
- *
- * RT候補を表示
- */
-function showCandidates(req, res){
-	rt_candidate_model.getRecents(100, function(recent_candidates) {
-		res.render('rt_candidate', { candidates: recent_candidates });
-	});
-};
-
 
 /**
  * アクション
@@ -116,6 +76,47 @@ function sendRtMail(req, res) {
 
 	res.send("done.");
 }
+
+
+
+// candidateに移動
+/**
+ * アクション
+ *
+ * RT候補のツイートに削除マークを付ける
+ */
+function deleteCandidate(req, res) {
+	var tweet_id = String(req.params.tweet_id);
+	rt_candidate_model.setDeleted(tweet_id);
+
+	res.send("done.");
+}
+/**
+ * アクション
+ *
+ * RT候補のうちフォローしたユーザが2人以上RTしているものをリツイート
+ *
+ */
+function rtFromCandidates(req, res) {
+	var action = require('../models/rt_from_candidates_action');
+
+	action.exec();
+	res.send("done.");
+}
+
+/**
+ * アクション
+ *
+ * RT候補を表示
+ */
+function showCandidates(req, res){
+	rt_candidate_model.getRecents(100, function(recent_candidates) {
+		res.render('rt_candidate', { candidates: recent_candidates });
+	});
+};
+// ここまで
+
+
 
 /**
  * デモコード

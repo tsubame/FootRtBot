@@ -1,5 +1,5 @@
 /**
- * sendRtMailActionの処理実行
+ * rtTweetsの処理実行
  *
  *
  */
@@ -20,16 +20,25 @@ var CONST = require('../etc/const');
  */
 exports.exec = exec;
 
-var many_rt_tweets = {};
-var recent_retweets = {};
-var should_rt_tweets = {};
+/**
+ *
+ */
+var many_rt_tweets    = {};
+var recent_retweets   = {};
+var should_rt_tweets  = {};
+var rt_candidates     = {};
 var rt_success_tweets = [];
-var rt_candidates = {};
 
-var rt_base_count = CONST.BASE_RT_COUNT;
 
-exports.setRtBaseCount = function(count) {
-	rt_base_count = count;
+/**
+ *
+ */
+function initArray() {
+	many_rt_tweets    = {};
+	recent_retweets   = {};
+	should_rt_tweets  = {};
+	rt_candidates     = {};
+	rt_success_tweets = [];
 }
 
 /**
@@ -39,23 +48,34 @@ exports.setRtBaseCount = function(count) {
  *
  */
 function exec() {
-	tw.setAccount(CONST.ACCOUNT.WATCH_TL);
+	initArray();
 
+	tw.setAccount(CONST.ACCOUNT.WATCH_TL);
 
 	async.series([
 		function(callback) {
+			var model = require('./retweet_model');
+			// DBから取得
+			model.getRecentRetweets(100, function(tweets) {
+				recent_retweets = tweets;
+				console.log(recent_retweets);
+				callback();
+			});
+/*
+
 			// 自分の最近のRTを取得
 			tw.setAccount(CONST.ACCOUNT.TWEET);
 			tw.getMyTimeLine(function(tweets) {
 				recent_retweets = tweets;
 				callback();
 			});
+*/
 		},
 		function(callback) {
-			// アカウントをセット
-			tw.setAccount(CONST.ACCOUNT.WATCH_TL);
 			// TLから100RT以上のツイートを取得
-			tw.pickupRtFromTl(rt_base_count, function(tweets) {
+			tw.setAccount(CONST.ACCOUNT.WATCH_TL);
+
+			tw.pickupRtFromTl(CONST.BASE_RT_COUNT, function(tweets) {
 				many_rt_tweets = tweets;
 				callback();
 			});
@@ -64,15 +84,17 @@ function exec() {
 			pickupShouldRtTweets(callback);
 		},
 		function(callback) {
+			// リツイート
 			tw.setAccount(CONST.ACCOUNT.TWEET);
 			retweetAtOnce(callback);
 		},
 		function(callback) {
-			// 保存
-			for(var i in rt_success_tweets) {
-				retweet_model.save(rt_success_tweets[i]);
+			// DBに保存
+			//for(var i in rt_success_tweets) {
+			for(var i in should_rt_tweets) {
+				retweet_model.saveIfNotExist(should_rt_tweets[i]);
+				//retweet_model.saveIfNotExist(rt_success_tweets[i]);
 			}
-
 			for(var i in rt_candidates) {
 				rt_candidate_model.saveIfNotExist(rt_candidates[i]);
 			}
@@ -99,6 +121,7 @@ function pickupShouldRtTweets(callback) {
 		var id = tweet.id;
 
 		if (recent_retweets[id]) {
+			console.log('RT済み');
 			end_count++;
 			continue;
 		}

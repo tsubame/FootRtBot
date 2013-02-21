@@ -14,7 +14,7 @@ exports.TL_GET_COUNT_ONCE = TL_GET_COUNT_ONCE;
 /**
  * この数以上のRT数でリツイート
  */
-var BASE_RT_COUNT = 50;//100;
+var BASE_RT_COUNT = 50;//50;//100;
 
 exports.BASE_RT_COUNT = BASE_RT_COUNT;
 
