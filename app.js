@@ -17,7 +17,8 @@ var app = express();
  * 設定
  */
 app.configure(function(){
-  app.set('port', process.env.PORT || 3000);
+  //app.set('port', process.env.PORT || 3000);
+  app.set('port', process.env.PORT || CONST.PORT);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
   app.set('view options', { layout: true });

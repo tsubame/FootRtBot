@@ -9,12 +9,9 @@
     "async": "*",
     "express": "3.0.6",
     "ejs": "*",
-    "mongoose": "2.4.7",
+    "mongoose": "*",
     "jade": "*",
     "oauth": "*",
-    "passport": "*",
-    "passport-oauth": "*",
-    "passport-twitter": "*",
     "nodemailer": "~0.3.37"
   }
 }

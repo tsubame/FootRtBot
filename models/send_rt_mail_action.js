@@ -13,6 +13,7 @@ var nodemailer = require("nodemailer");
 var async = require('async');
 var retweet_model = require('./retweet_model');
 var rt_candidate_model = require('./rt_candidate_model');
+var CONST = require('../etc/const');
 
 /**
  * exports.
@@ -52,11 +53,13 @@ var smtpTransport;
  * @var object
  */
 var mailOptions = {
-    from: MAIL_FROM,
-    to: MAIL_TO,
+    from: CONST.MAIL.FROM,
+    to: CONST.MAIL.TO,
     subject: '',
     text: ''
 }
+
+
 
 /**
  * 処理実行
@@ -73,7 +76,6 @@ function exec() {
 		},
 		function(callback) {
 			sendTodaysCandidates(callback);
-			//callback();
 		}
 	],
 	function(err, results) {
@@ -90,11 +92,22 @@ function exec() {
  * 初期化
  */
 function init() {
+
+	/*
 	smtpTransport = nodemailer.createTransport('SMTP',{
 	    service: MAIL_SERVICE,
 	    auth: {
 	        user: MAIL_USER,
 	        pass: MAIL_PASS
+	    }
+	});
+	*/
+
+	smtpTransport = nodemailer.createTransport('SMTP',{
+	    service: CONST.MAIL.SERVICE,
+	    auth: {
+	        user: CONST.MAIL.USER_NAME,
+	        pass: CONST.MAIL.PASSWORD
 	    }
 	});
 }
@@ -114,12 +127,19 @@ function sendTodaysRt(callback) {
 	retweet_model.getTodaysRetweets(function(results) {
 		var full_text = '';
 		// 本文作成
+		for (var id in results) {
+			var tweet = results[id];
+			var text = tweet.user_name + '\n' +
+			'RT: ' + tweet.rt_count + '\n' + tweet.text + '\n\n\n';
+			full_text += text;
+		}
+		/*
 		for(var i = 0; i < results.length; i++) {
 			var tweet = results[i];
 			var text = tweet.user_name + '\n' +
 				'RT: ' + tweet.rt_count + '\n' + tweet.text + '\n\n\n';
 			full_text += text;
-		}
+		}*/
 
 		mailOptions.subject = "本日のRT";
 		mailOptions.text = full_text;
@@ -143,11 +163,13 @@ function sendTodaysCandidates(callback) {
 	// 本日のRT候補を取得
 	rt_candidate_model.getTodaysCandidates(function(results) {
 		var full_text = '';
+
+		full_text += CONST.APP_URL + 'rt_candidate/show　\n\n';
 		// 本文作成
-		for(var i = 0; i < results.length; i++) {
-			var tweet = results[i];
+		for (var id in results) {
+			var tweet = results[id];
 			var text = tweet.user_name + '\n' +
-					'RT: ' + tweet.rt_count + '\n' + tweet.text + '\n\n\n';
+			'RT: ' + tweet.rt_count + '\n' + tweet.text + '\n\n\n';
 			full_text += text;
 		}
 
@@ -161,49 +183,7 @@ function sendTodaysCandidates(callback) {
 		        console.log("Message sent: " + response.message);
 		    }
 
-		    //smtpTransport.close();
 		    callback();
 		});
 	});
 }
-
-/*
-function exec_org() {
-	rt_candidate_model.getTodaysCandidates(function(results) {
-		var smtpTransport = nodemailer.createTransport("SMTP",{
-		    service: "Gmail",
-		    auth: {
-		        user: "apricot34",
-		        pass: "sheisagirl"
-		    }
-		});
-
-		var full_text = '';
-
-		for(var i = 0; i < results.length; i++) {
-			var tweet = results[i];
-			var text = tweet.user_name + '\n' +
-					'RT: ' + tweet.rt_count + '\n' + tweet.text + '\n' +
-					 '\n\n';
-			full_text += text;
-		}
-
-		var mailOptions = {
-		    from: "100RTbot <apricot34@gmail.com>",
-		    to: "dortmund23andcska18@gmail.com",
-		    subject: "本日のRT候補",
-		    text: full_text
-		}
-
-		smtpTransport.sendMail(mailOptions, function(error, response){
-			if(error){
-				console.log(error);
-			} else {
-		        console.log("Message sent: " + response.message);
-		    }
-
-		    smtpTransport.close();
-		});
-	});
-}
-*/
