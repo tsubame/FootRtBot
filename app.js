@@ -62,6 +62,8 @@ app.get('/retweet/demo',       retweet.demo);
 
 
 /*
+
+
 app.get('/follow_candidate/update', follow_candidate.update);
 app.get('/follow_candidate/show', follow_candidate.show);
 */
