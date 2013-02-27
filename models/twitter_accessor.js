@@ -11,7 +11,11 @@
  */
 var OAuth = require('oauth').OAuth
   , async = require('async')
-  , http  = require('http');
+  , http  = require('http')
+  , log4js = require('log4js');
+  
+  
+
 
 /**
  * exports.
@@ -31,11 +35,30 @@ exports.getMyFriendIds = getMyFriendIds;
 exports.getRtUserIds = getRtUserIds;
 
 exports.demo = function() {
-	retweet({aa: 11}, function() {
-		console.log();
+	retweet('304992436046942211', function(tweet) {
+		//console.log(tweet);
 	});
-}
+};
 
+/**
+ *
+ */
+var error_log_file_path = './logs/logging.log';
+
+// これをメソッドで外から設定
+log4js.configure({
+		appenders: [{
+		'type': 'file',
+		'filename': error_log_file_path
+		}]
+	});
+
+var logger = log4js.getLogger('file');
+
+exports.setLogConfig = function(log_config) {
+	log4js.configure(log_config);
+	logger = log4js.getLogger('file');
+};
 
 /**
  * リクエストトークンURL
@@ -126,8 +149,8 @@ function accessApiWithGet(url, callback) {
 		account.access_token_secret,
 		function(err, data, response) {
 			if(err){
-				console.log(url);
-				console.log(err);
+				logger.error(url);
+				logger.error(err);
 				return;
 			}
 
@@ -155,12 +178,12 @@ function accessApiWithPost(url, callback) {
 			try {
 				data = JSON.parse(data_string);
 				if(err){
-					console.log(url);
-					console.log(data.errors);
+					logger.error(url);
+					logger.error(data.errors);
 				}
 
 			} catch(e) {
-				console.log(e);
+				logger.error(e);
 				data.errors = e;
 			}
 
@@ -240,8 +263,8 @@ function pickupRtFromTl(pickup_rt_count, callback) {
 
 	// 複数回リクエスト
 	for (var n = 1; n <= req_count; n++) {
-		var url = 'https://api.twitter.com/1/statuses/home_timeline.json?count=' + get_tl_count_once + '&page=' + n;
-		//var url = 'https://api.twitter.com/1.1/statuses/home_timeline.json?count=' + TL_GET_COUNT_ONCE + '&page=' + n;
+		//var url = 'https://api.twitter.com/1/statuses/home_timeline.json?count=' + get_tl_count_once + '&page=' + n;
+		var url = 'https://api.twitter.com/1.1/statuses/home_timeline.json?count=' + get_tl_count_once + '&page=' + n;
 
 		accessApiWithGet(url, function(json_string) {
 			var json_datas = JSON.parse(json_string);
@@ -317,7 +340,6 @@ function tweetJsonToObject(json_data, callback) {
 	callback(tweet);
 }
 
-
 /**
  * ツイートをリツイートする
  * ツイートIDで指定
@@ -325,17 +347,19 @@ function tweetJsonToObject(json_data, callback) {
  * @var obj tweet_id
  * @var function callback(tweet)
  */
-
 function retweet(tweet_id, callback) {
-	var url = 'https://api.twitter.com/1/statuses/retweet/' + tweet_id + '.json';
+	//var url = 'https://api.twitter.com/1/statuses/retweet/' + tweet_id + '.json';
+	var url = 'https://api.twitter.com/1.1/statuses/retweet/' + tweet_id + '.json';
 
 	accessApiWithPost(url, function(data) {
 		if(data.errors){
 			callback();
 		} else {
-			console.log('RT成功：' + tweet_id);
+			//console.log('RT成功：' + tweet_id);
+			logger.info('RT成功：' + tweet_id);
 			tweetJsonToObject(data, function(tweet) {
 				console.log(tweet);
+				//logger.info(tweet);
 				callback(tweet);
 			});
 		}
@@ -363,7 +387,7 @@ function getFriendIds(screen_name, callback) {
 	    	var id = String(ids[i]);
 	    	friends[id] = {
 				id: id
-			}
+			};
 		}
 
 		callback(friends);
@@ -397,7 +421,8 @@ function getRtUserIds(tweet, callback) {
 
 	async.series([
 	    function(cb) {
-			var url = 'https://api.twitter.com/1/statuses/retweets/' + tweet_id + '.json?count=100';
+			//var url = 'https://api.twitter.com/1/statuses/retweets/' + tweet_id + '.json?count=100';
+			var url = 'https://api.twitter.com/1.1/statuses/retweets/' + tweet_id + '.json?count=100';
 			console.log(tweet_id + 'のRTユーザを取得中...');
 			accessApiWithGet(url, function(data) {
 				var rts = JSON.parse(data);
@@ -410,11 +435,14 @@ function getRtUserIds(tweet, callback) {
 				cb();
 			});
 	    },
+// 1.1でのAPIがないため改修する必要あり
 	    function(cb) {
 	    	var end_count = 1;
 			var req_count = Math.ceil(rt_count / 100);
 			for (var i = 2; i <= req_count; i++) {
 				var url = 'https://api.twitter.com/1/statuses/' + tweet_id + '/retweeted_by/ids.json?count=100&page=' + i;
+				//var url = 'https://api.twitter.com/1.1/statuses/' + tweet_id + '/retweeted_by/ids.json?count=100&page=' + i;
+
 				console.log(tweet_id + 'のRTユーザを取得中... リクエスト回数：' + i);
 				accessApiWithGet(url, function(data) {
 

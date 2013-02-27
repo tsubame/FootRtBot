@@ -8,34 +8,59 @@ var app_config = require('./app_config');
  * 開発中は1
  * リリース時は0
  */
-var DEV_LEVEL = 1; //1;
+var DEV_LEVEL = app_config.dev_level;
+
+/**
+ * ログファイルのパス
+ */
+var LOG_FILE_PATH = './logs/error.log';
+
+/**
+ * log4jsのオプション
+ */
+exports.LOG4JS_CONFIG = {
+		appenders: [{
+		'type': 'file',
+		'filename': LOG_FILE_PATH
+		}]
+	};
 
 /**
  * TLから1度に取得するツイートの数
  */
-var TL_GET_COUNT_ONCE = 200;
-
-exports.TL_GET_COUNT_ONCE = TL_GET_COUNT_ONCE;
+exports.TL_GET_COUNT_ONCE = 200;
 
 /**
  * この数以上のRT数でリツイート
  */
-var BASE_RT_COUNT = 50;//100;
+exports.BASE_RT_COUNT = app_config.base_rt_count; //70;
 
-exports.BASE_RT_COUNT = BASE_RT_COUNT;
+/**
+ * この数以上でツイート候補を取得
+ */
+exports.CAND_BASE_RT_COUNT = app_config.cand_base_rt_count; //50;
 
 /**
  * トップページのアドレス
  */
-//exports.APP_URL = 'http://kuroneko.info:3000/';
 exports.APP_URL = app_config.app_url;
 
 /**
  * OAuthコールバックのURL
  */
-var OAUTH_CALLBACK_URL  = 'http://127.0.0.1:3000/auth/tweet/callback';
+exports.OAUTH_CALLBACK_URL = app_config.app_url + 'auth/tweet/callback';
 
-exports.OAUTH_CALLBACK_URL = OAUTH_CALLBACK_URL;
+
+/**
+ * log4j
+ * ログファイル名
+ *
+ */
+exports.LOG = {
+		DIR: './logs/',
+		INFO_FILE: 'info.log',
+		ERROR_FILE: 'error.log'
+}
 
 /**
  * メールアカウント
@@ -50,12 +75,6 @@ exports.PORT = app_config.port;
 /**
  * DBパラメータ
  */
-var DB_PARAMS = {
-	host: '127.0.0.1',
-	name: 'foot_rt'
-}
-
-//exports.DB_PARAMS = DB_PARAMS;
 exports.DB_PARAMS = app_config.db_params;
 
 /**
@@ -65,25 +84,20 @@ exports.DB_PARAMS = app_config.db_params;
  * TWEET: つぶやき用に使用
  */
 var ACCOUNT = {
-	WATCH_TL: {},
-	TWEET: {}
-	/*
-	,
-	foot_rt: {
-		screen_name:         'foot_rt',
-		consumer_key:        'W3EFf1ufSQPKhJvzglSlg',
-		consumer_secret:     'B3JAd5KKtA3OZht7sBU10h0VYrk1S2uwOCI2PF00g4',
-		access_token:        '1095087402-ucXlGjN7jCmsaSwLQtr9tfUrnKzHy7uA3jdfCc8',
-		access_token_secret: 'rEI5xfh9WXnHT3w705L5r60abReVEiA2gCSjZqUxI'
+	WATCH_TL: {
+		screen_name:         '',
+		consumer_key:        '',
+		consumer_secret:     '',
+		access_token:        '',
+		access_token_secret: ''
 	},
-	foot_rt2: {
-		screen_name: 'foot_rt2',
-		consumer_key: 'xeGIQrFfbEtYq6JxBxF6g',
-		consumer_secret: 'sh5zxBMGDWtOB5t1P2O3oDMhnHJgQuArDmqnxApSUg',
-		access_token: '1156953000-0GjxaYlc3aXWoNUvRMKkQ72eD5rTWcSXhkc1DEI',
-		access_token_secret: 'JlrR8zB7zCadUoLJwbRZ8VphBWP4kE0C0WfFTSNNA'
+	TWEET: {
+		screen_name:         '',
+		consumer_key:        '',
+		consumer_secret:     '',
+		access_token:        '',
+		access_token_secret: ''	
 	}
-	*/
 }
 
 
@@ -92,19 +106,12 @@ var ACCOUNT = {
  *
  */
 if (DEV_LEVEL == 1) {
-	//ACCOUNT.WATCH_TL = ACCOUNT.foot_rt2;
-	//ACCOUNT.TWEET    = ACCOUNT.foot_rt2;
-
 	ACCOUNT.WATCH_TL = app_config.twitter.WATCH_TL;
 	ACCOUNT.TWEET    = app_config.twitter.WATCH_TL;
 
 } else {
-	//ACCOUNT.WATCH_TL = ACCOUNT.foot_rt2;
-	//ACCOUNT.TWEET    = ACCOUNT.foot_rt;
-
 	ACCOUNT.WATCH_TL = app_config.twitter.WATCH_TL;
 	ACCOUNT.TWEET    = app_config.twitter.TWEET;
-
 }
 
 //console.log(ACCOUNT);

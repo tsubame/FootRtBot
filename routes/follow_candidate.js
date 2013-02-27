@@ -66,8 +66,6 @@ var my_friends = {};
  */
 function getFollowCandidate(callback) {
 
-
-
 	async.series([
 		function(cb) {
 			tw.getMyFriendIds(function(friends) {

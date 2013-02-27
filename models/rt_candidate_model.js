@@ -44,6 +44,12 @@ mongoose.model('rt_candidate', schema);
 var RtCandidateModel = mongoose.model('rt_candidate');
 
 /**
+ *
+ */
+var error_message = null;
+exports.error_message = error_message;
+
+/**
  * signal 飛んできたら閉じる
  */
 process.on('SIGINT', function() {
@@ -58,8 +64,7 @@ process.on('SIGINT', function() {
  * 削除
  */
 function remove(tweet) {
-	var model = new RtCandidateModel();
-
+	//var model = new RtCandidateModel();
 	try {
 		RtCandidateModel.remove(tweet, function(err, result) {
 			if (err) {
@@ -76,7 +81,7 @@ function remove(tweet) {
  */
 function removeById(tweet_id) {
 	var tweet = null;
-	var model = new RtCandidateModel(tweet);
+	//var model = new RtCandidateModel(tweet);
 
 	RtCandidateModel
 	.where('id').equals(tweet_id)
@@ -107,7 +112,7 @@ function removeById(tweet_id) {
  */
 function setDeleted(tweet_id) {
 	var tweet = null;
-	var model = new RtCandidateModel(tweet);
+	//var model = new RtCandidateModel(tweet);
 
 	RtCandidateModel
 	.where('id').equals(tweet_id)
@@ -137,7 +142,7 @@ function setDeleted(tweet_id) {
 
 function selectByTweetId(tweet_id, callback) {
 	var tweet = null;
-	var model = new RtCandidateModel(tweet);
+	//var model = new RtCandidateModel(tweet);
 
 	RtCandidateModel
 	.where('id').equals(tweet_id)
@@ -181,7 +186,7 @@ function save(tweet) {
  * @var obj tweet
  */
 function saveIfNotExist(tweet) {
-	var model = new RtCandidateModel(tweet);
+	//var model = new RtCandidateModel(tweet);
 
 	RtCandidateModel
 	.where('id').equals(tweet.id)
@@ -223,9 +228,6 @@ function getRecents(limit, callback) {
 	});
 }
 
-
-
-
 /**
  * 24時間以内のRT候補を取得
  * 削除済みマークがついてるものは取得しない
@@ -233,9 +235,6 @@ function getRecents(limit, callback) {
  */
 function getTodaysCandidates(callback) {
 	var mts = new Date().getTime();
-	var ts = mts / 1000;
-	var yesterdayTs = ts - 86400;
-
 	var yesterday = new Date().setTime(mts - 86400000);
 
 	RtCandidateModel

@@ -16,6 +16,10 @@ exports.sendRtMail = sendRtMail;
 exports.showRecentRetweets = showRecentRetweets;
 exports.demo = demo;
 
+var log4js = require('log4js');
+// これをメソッドで外から設定
+log4js.configure(CONST.LOG4JS_CONFIG);
+var logger = log4js.getLogger('file');
 
 /**
  * アクション
@@ -26,7 +30,7 @@ function rtTweets(req, res){
 	var action = require('../models/rt_tweets_action');
 	action.exec();
 
-	res.send("done.");
+	res.send('done.');
 };
 
 /**
@@ -48,7 +52,7 @@ function sendRtMail(req, res) {
 	var action = require('../models/send_rt_mail_action');
 	action.exec();
 
-	res.send("done.");
+	res.send('done.');
 }
 
 
@@ -56,8 +60,16 @@ function sendRtMail(req, res) {
  * デモコード
  */
 function demo(req, res) {
-	tw.setAccount(CONST.ACCOUNT.TWEET);
-	tw.demo();
 
-	res.send("done.");
+	logger.info('This is test.');
+	logger.error('This is test.');
+	
+	/*
+	log4js.configure({
+		appenders: [{
+		'type': 'file',
+		'filename': './logs/logging.log'
+		}]
+	});*/
+	res.send('done.');
 }

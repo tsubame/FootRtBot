@@ -1,0 +1,61 @@
+[2013-02-27 21:43:42.183] [INFO] file - RT成功：306694186281869312
+[2013-02-27 21:43:42.184] [INFO] file - { id: '306694186281869312',
+  user_id: '1126887589',
+  user_name: 'KAGAWA SHINJI / 香川真司',
+  user_s_name: 'S_Kagawa0317',
+  text: 'これから練習行ってきます(^○^)',
+  rt_count: 1088,
+  posted: Wed Feb 27 2013 18:16:06 GMT+0900 (JST),
+  created: Wed Feb 27 2013 21:43:42 GMT+0900 (JST),
+  is_friend_tweet: false,
+  rt_user: '稲穂新',
+  is_deleted: false }
+[2013-02-27 21:43:42.195] [INFO] file - RT成功：306681403066703872
+[2013-02-27 21:43:42.195] [INFO] file - { id: '306681403066703872',
+  user_id: '430517087',
+  user_name: '清武弘嗣',
+  user_s_name: '13_hiroshi',
+  text: '@S_Kagawa0317 真司くん(*^^*)',
+  rt_count: 418,
+  posted: Wed Feb 27 2013 17:25:19 GMT+0900 (JST),
+  created: Wed Feb 27 2013 21:43:42 GMT+0900 (JST),
+  is_friend_tweet: false,
+  rt_user: '稲穂新',
+  is_deleted: false }
+[2013-02-27 21:43:42.201] [INFO] file - RT成功：306650281519755264
+[2013-02-27 21:43:42.201] [INFO] file - { id: '306650281519755264',
+  user_id: '46588298',
+  user_name: 'サッカーキング',
+  user_s_name: 'SoccerKingJP',
+  text: 'バラック氏の引退試合で、モウリーニョ監督がメッシを指揮か http://t.co/4IpU4TPJsv 実現すれば、とても興味深い光景です。',
+  rt_count: 118,
+  posted: Wed Feb 27 2013 15:21:39 GMT+0900 (JST),
+  created: Wed Feb 27 2013 21:43:42 GMT+0900 (JST),
+  is_friend_tweet: false,
+  rt_user: '稲穂新',
+  is_deleted: false }
+[2013-02-27 21:43:42.228] [INFO] file - RT成功：306685200031678464
+[2013-02-27 21:43:42.228] [INFO] file - { id: '306685200031678464',
+  user_id: '46588298',
+  user_name: 'サッカーキング',
+  user_s_name: 'SoccerKingJP',
+  text: 'マンUのルーニー「6人でサッカーをするならシンジを選ぶ」 http://t.co/1vda6EKlHe 「C・ロナウドとメッシ、世界最高の選手はどっち?」というファンからの質問にも答えています。',
+  rt_count: 235,
+  posted: Wed Feb 27 2013 17:40:24 GMT+0900 (JST),
+  created: Wed Feb 27 2013 21:43:42 GMT+0900 (JST),
+  is_friend_tweet: false,
+  rt_user: '稲穂新',
+  is_deleted: false }
+[2013-02-27 21:43:42.353] [INFO] file - RT成功：306673761476816896
+[2013-02-27 21:43:42.354] [INFO] file - { id: '306673761476816896',
+  user_id: '46588298',
+  user_name: 'サッカーキング',
+  user_s_name: 'SoccerKingJP',
+  text: '完全移籍が決定したバルデス「バレンシアでベストを尽くす」 http://t.co/paRdsBViOn 完全移籍を勝ち取りました。',
+  rt_count: 80,
+  posted: Wed Feb 27 2013 16:54:57 GMT+0900 (JST),
+  created: Wed Feb 27 2013 21:43:42 GMT+0900 (JST),
+  is_friend_tweet: false,
+  rt_user: '稲穂新',
+  is_deleted: false }
+[2013-02-27 22:04:54.245] [INFO] file - RT成功：306633723649064961

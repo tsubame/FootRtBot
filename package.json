@@ -12,6 +12,7 @@
     "mongoose": "*",
     "jade": "*",
     "oauth": "*",
-    "nodemailer": "~0.3.37"
+    "nodemailer": "*",
+    "log4js": "*"
   }
 }

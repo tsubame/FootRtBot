@@ -18,27 +18,6 @@ exports.remove = remove;
 exports.getTodaysRetweets = getTodaysRetweets;
 exports.getRecentRetweets = getRecentRetweets;
 
-/*
-exports.setDbParams= function(config) {
-	db_params = config;
-	connect();
-}
-
-var db_params = {
-		host: '',
-		name: ''
-}
-
-
-function connect(){
-	try {
-		mongoose.connect('mongodb://' + db_params.host + '/' + db_params.name );
-	} catch (e) {
-		console.log(e);
-	}
-}
-*/
-
 // signal 飛んできたら閉じる
 process.on('SIGINT', function() {
 	try {
@@ -74,8 +53,7 @@ var RetweetModel = mongoose.model('retweets');
  * 削除
  */
 function remove(tweet) {
-	var model = new RetweetModel();
-
+	//var model = new RetweetModel();
 	try {
 		RetweetModel.remove(candidate, function(err, result) {
 			if (err) {
@@ -111,8 +89,7 @@ function save(tweet) {
  * @var obj tweet
  */
 function saveIfNotExist(tweet) {
-	var model = new RetweetModel(tweet);
-
+	//var model = new RetweetModel(tweet);
 	RetweetModel
 	.where('id').equals(tweet.id)
 	.find({})
@@ -132,10 +109,8 @@ function saveIfNotExist(tweet) {
  *
  */
 function getRecentRetweets(limit, callback) {
-
-	var tweets = {}
-
-	if (!limit) {
+	var tweets = {};
+	if (! limit) {
 		limit = 100;
 	}
 
@@ -151,9 +126,7 @@ function getRecentRetweets(limit, callback) {
 				var id = result[i].id;
 				tweets[id] = result[i];
 			}
-						//console.log(tweets);
 			callback(tweets);
-			//callback(result);
 		}
 	});
 }
@@ -163,15 +136,8 @@ function getRecentRetweets(limit, callback) {
  *
  */
 function getTodaysRetweets(callback) {
-
-	var tweets = {}
-
-	console.log(new Date());
-
+	var tweets = {};
 	var mts = new Date().getTime();
-	var ts = mts / 1000;
-	var yesterdayTs = ts - 86400;
-
 	var yesterday = new Date().setTime(mts - 86400000);
 
 	RetweetModel
@@ -188,7 +154,6 @@ function getTodaysRetweets(callback) {
 			}
 			console.log(tweets);
 			callback(tweets);
-			//callback(result);
 		}
 	});
 }

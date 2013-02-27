@@ -22,17 +22,61 @@ exports.exec = exec;
 
 var my_friends = {};
 var rt_success_tweets = [];
-var skip_rt_count = 500;
+var skip_rt_count = 300;
 var candidates = [];
 var rt_user_count = 2;
 
 /**
  * 処理実行
  *
-
  *
  */
 function exec() {
+	tw.setAccount(CONST.ACCOUNT.WATCH_TL);
+
+	async.series([
+	    function(cb) {
+	    	// 最近のRT候補を取得
+	    	rt_candidate_model.getTodaysCandidates(function(results) {
+	    		candidates = results;
+	    		cb();
+	    	});
+		},
+	    function(cb) {
+	    	for (var i = 0; i < candidates.length; i++) {
+	    		var tweet = candidates[i];
+
+	    		// RT
+				tw.retweet(tweet.id, function(retweet) {
+					if (retweet) {
+						console.log(retweet);
+						//retweet_model.save(retweet);
+						//rt_candidate_model.setDeleted(retweet.id);
+					}
+					//end_count ++;
+				});
+			}
+		},
+		function(cb) {
+			//
+	    	//tw.setAccount(CONST.ACCOUNT.TWEET);
+			pickupRtTweets(cb);
+		}
+	],
+	function(err, results) {
+		if(err) {
+			throw err;
+		} else {
+			console.log('finished!');
+		}
+	});
+}
+
+
+
+
+
+function execOrg() {
 	tw.setAccount(CONST.ACCOUNT.WATCH_TL);
 
 	async.series([

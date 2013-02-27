@@ -15,6 +15,8 @@ var rt_candidate_model = require('./rt_candidate_model');
 var tw =  require('./twitter_accessor');
 var CONST = require('../etc/const');
 
+tw.setLogConfig(CONST.LOG4JS_CONFIG);
+	
 /**
  * exports.
  */
@@ -29,6 +31,11 @@ var should_rt_tweets  = {};
 var rt_candidates     = {};
 var rt_success_tweets = [];
 
+/**
+ *
+ */
+var base_rt_count = CONST.BASE_RT_COUNT;
+var cand_base_rt_count = CONST.CAND_BASE_RT_COUNT;
 
 /**
  *
@@ -49,7 +56,6 @@ function initArray() {
  */
 function exec() {
 	initArray();
-
 	tw.setAccount(CONST.ACCOUNT.WATCH_TL);
 
 	async.series([
@@ -61,21 +67,20 @@ function exec() {
 				console.log(recent_retweets);
 				callback();
 			});
-/*
-
-			// 自分の最近のRTを取得
-			tw.setAccount(CONST.ACCOUNT.TWEET);
-			tw.getMyTimeLine(function(tweets) {
-				recent_retweets = tweets;
-				callback();
-			});
-*/
 		},
 		function(callback) {
 			// TLから100RT以上のツイートを取得
 			tw.setAccount(CONST.ACCOUNT.WATCH_TL);
+			
+			var pickup_rt_count = 0;
+			if (base_rt_count < cand_base_rt_count) {
+				pickup_rt_count = base_rt_count;
+			} else {
+				pickup_rt_count = cand_base_rt_count;			
+			}
 
-			tw.pickupRtFromTl(CONST.BASE_RT_COUNT, function(tweets) {
+			tw.pickupRtFromTl(pickup_rt_count, function(tweets) {
+			//tw.pickupRtFromTl(CONST.BASE_RT_COUNT, function(tweets) {
 				many_rt_tweets = tweets;
 				callback();
 			});
@@ -90,10 +95,8 @@ function exec() {
 		},
 		function(callback) {
 			// DBに保存
-			//for(var i in rt_success_tweets) {
 			for(var i in should_rt_tweets) {
 				retweet_model.saveIfNotExist(should_rt_tweets[i]);
-				//retweet_model.saveIfNotExist(rt_success_tweets[i]);
 			}
 			for(var i in rt_candidates) {
 				rt_candidate_model.saveIfNotExist(rt_candidates[i]);
@@ -106,6 +109,8 @@ function exec() {
 		if(err) {
 			throw err;
 		} else {
+			console.log(should_rt_tweets);
+			console.log(rt_candidates);
 			console.log('finished!');
 		}
 	});
@@ -116,7 +121,6 @@ function pickupShouldRtTweets(callback) {
 	var end_count    = 0;
 
 	for (var i = 0; i < many_rt_tweets.length; i++) {
-	//for (var i = many_rt_tweets.length - 1; 0 <= i; i--) {
 		var tweet = many_rt_tweets[i];
 		var id = tweet.id;
 
@@ -126,11 +130,17 @@ function pickupShouldRtTweets(callback) {
 			continue;
 		}
 
+		if (tweet.is_friend_tweet == true && base_rt_count <= tweet.rt_count) {
+			should_rt_tweets[id] = tweet;
+		} else if (tweet.is_friend_tweet == false && cand_base_rt_count <= tweet.rt_count) {
+			rt_candidates[id] = tweet;
+		}
+		/*		
 		if (tweet.is_friend_tweet == false) {
 			rt_candidates[id] = tweet;
 		} else {
 			should_rt_tweets[id] = tweet;
-		}
+		}*/
 
 		end_count++;
 	}

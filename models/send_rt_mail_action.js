@@ -21,26 +21,6 @@ var CONST = require('../etc/const');
 exports.exec = exec;
 
 /**
- * メールパラメータ
- *
- * @var String
- */
-// 外に出せる定数
-var MAIL_SERVICE = 'Gmail';
-var MAIL_TO = 'dortmund23andcska18@gmail.com';
-var MAIL_FROM = '100RTbot <apricot34@gmail.com>';
-
-/**
- * メールアカウントとパスワード
- *
- * @var String
- */
-// 公開するのは危険？ ファイルで外に出しましょう
-var MAIL_USER = 'apricot34';
-var MAIL_PASS = 'sheisagirl';
-//
-
-/**
  * SmtpTransportオブジェクト
  *
  * @var object
@@ -57,9 +37,7 @@ var mailOptions = {
     to: CONST.MAIL.TO,
     subject: '',
     text: ''
-}
-
-
+};
 
 /**
  * 処理実行
@@ -71,9 +49,11 @@ function exec() {
 	init();
 
 	async.series([
+		/*
 		function(callback) {
-			sendTodaysRt(callback);
-		},
+			//sendTodaysRt(callback);
+			callback();
+		},*/
 		function(callback) {
 			sendTodaysCandidates(callback);
 		}
@@ -92,17 +72,6 @@ function exec() {
  * 初期化
  */
 function init() {
-
-	/*
-	smtpTransport = nodemailer.createTransport('SMTP',{
-	    service: MAIL_SERVICE,
-	    auth: {
-	        user: MAIL_USER,
-	        pass: MAIL_PASS
-	    }
-	});
-	*/
-
 	smtpTransport = nodemailer.createTransport('SMTP',{
 	    service: CONST.MAIL.SERVICE,
 	    auth: {

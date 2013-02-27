@@ -28,6 +28,9 @@ function deleteCandidate(req, res) {
 	res.send("done.");
 }
 
+
+// 制限に引っかかるため要ロジック変更 or 廃止
+
 /**
  * アクション
  *
