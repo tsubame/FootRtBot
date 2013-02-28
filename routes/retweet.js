@@ -60,7 +60,10 @@ function sendRtMail(req, res) {
  * デモコード
  */
 function demo(req, res) {
-
+	tw.setAccount(CONST.ACCOUNT.TWEET);
+	//tw.setAccount(CONST.ACCOUNT.WATCH_TL);
+	tw.demo();
+	/*
 	logger.info('This is test.');
 	logger.error('This is test.');
 	

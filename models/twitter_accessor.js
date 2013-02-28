@@ -28,33 +28,44 @@ exports.getMyTimeLine = getMyTimeLine;
 
 exports.pickupRtFromTl = pickupRtFromTl;
 
+exports.getFollowerIds = getFollowerIds;
+
+exports.getMyFollowerIds = getMyFollowerIds;
+
 exports.getFriendIds = getFriendIds;
 
 exports.getMyFriendIds = getMyFriendIds;
 
 exports.getRtUserIds = getRtUserIds;
 
+exports.follow = follow;
+
 exports.demo = function() {
-	retweet('304992436046942211', function(tweet) {
-		//console.log(tweet);
-	});
+
 };
 
 /**
- *
+ * ログファイルのパス
  */
-var error_log_file_path = './logs/logging.log';
+var error_log_file_path = 'logging.log';
 
-// これをメソッドで外から設定
-log4js.configure({
-		appenders: [{
+/**
+ * ロガーの設定
+ */
+try {
+	log4js.configure({ appenders: [{
 		'type': 'file',
 		'filename': error_log_file_path
-		}]
-	});
+		}]});
+} catch (e) {
+	console.log(e);
+}
 
 var logger = log4js.getLogger('file');
 
+/**
+ * ロガーの設定
+ */
 exports.setLogConfig = function(log_config) {
 	log4js.configure(log_config);
 	logger = log4js.getLogger('file');
@@ -115,7 +126,6 @@ var account = {
 	access_token_secret: ''
 };
 
-
 /**
  * アカウントをセット
  */
@@ -147,11 +157,17 @@ function accessApiWithGet(url, callback) {
 		'GET',
 		account.access_token,
 		account.access_token_secret,
-		function(err, data, response) {
-			if(err){
-				logger.error(url);
-				logger.error(err);
-				return;
+		function(err, data_string, response) {
+			var data = {};
+			try {
+				data = JSON.parse(data_string);
+				if(err) {
+					logger.error(url);
+					logger.error(data.errors);
+				}
+			} catch(e) {
+				logger.error(e);
+				data.errors = e;
 			}
 
 			callback(data);
@@ -167,12 +183,12 @@ function accessApiWithGet(url, callback) {
  * @var String   url
  * @var function callback(data)
  */
-function accessApiWithPost(url, callback) {
-	oauth.getProtectedResource(
+function accessApiWithPost(url, data, callback) {
+	oauth.post(
 		url,
-		'POST',
 		account.access_token,
 		account.access_token_secret,
+		data,
 		function(err, data_string, response) {
 			var data = {};
 			try {
@@ -181,12 +197,11 @@ function accessApiWithPost(url, callback) {
 					logger.error(url);
 					logger.error(data.errors);
 				}
-
 			} catch(e) {
 				logger.error(e);
 				data.errors = e;
 			}
-
+		
 			callback(data);
 		}
 	);
@@ -203,10 +218,10 @@ function accessApiWithPost(url, callback) {
  */
 function getUserTimeline(screen_name, callback) {
 	var tweets = {};
-
 	var url = 'https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&screen_name=' + screen_name;
-	accessApiWithGet(url, function(json_string) {
-		var json_datas = JSON.parse(json_string);
+	//accessApiWithGet(url, function(json_string) {
+	accessApiWithGet(url, function(json_datas) {
+		//var json_datas = JSON.parse(json_string);
 		// ツイートの件数ループ
 		for (var i in json_datas) {
 			// RTされたツイートならretweeted_statusを取り出す
@@ -245,7 +260,6 @@ function getMyTimeLine(callback) {
 	getUserTimeline(account.screen_name, callback);
 }
 
-
 // 1と1.1どっちが良い？
 
 /**
@@ -263,21 +277,19 @@ function pickupRtFromTl(pickup_rt_count, callback) {
 
 	// 複数回リクエスト
 	for (var n = 1; n <= req_count; n++) {
-		//var url = 'https://api.twitter.com/1/statuses/home_timeline.json?count=' + get_tl_count_once + '&page=' + n;
 		var url = 'https://api.twitter.com/1.1/statuses/home_timeline.json?count=' + get_tl_count_once + '&page=' + n;
-
-		accessApiWithGet(url, function(json_string) {
-			var json_datas = JSON.parse(json_string);
-			for (var i in json_datas) {
-				tweetJsonToObject(json_datas[i], function(tweet) {
-					var id = tweet.id;
-					// RT数が一定以上なら保存
-					if (pickup_rt_count <= tweet.rt_count) {
-						retweets.push(tweet);
-					}
-				});
+		
+		accessApiWithGet(url, function(json_datas) {
+			if(! json_datas.errors){
+				for (var i in json_datas) {
+					tweetJsonToObject(json_datas[i], function(tweet) {
+						if (pickup_rt_count <= tweet.rt_count) {
+							retweets.push(tweet);
+						}
+					});
+				}
 			}
-
+			
 			req_end_count ++;
 		});
 	}
@@ -348,40 +360,69 @@ function tweetJsonToObject(json_data, callback) {
  * @var function callback(tweet)
  */
 function retweet(tweet_id, callback) {
-	//var url = 'https://api.twitter.com/1/statuses/retweet/' + tweet_id + '.json';
 	var url = 'https://api.twitter.com/1.1/statuses/retweet/' + tweet_id + '.json';
 
-	accessApiWithPost(url, function(data) {
+	accessApiWithPost(url, {}, function(data) {
 		if(data.errors){
 			callback();
 		} else {
-			//console.log('RT成功：' + tweet_id);
-			logger.info('RT成功：' + tweet_id);
+			console.log('RT成功：' + tweet_id);
+			//logger.info('RT成功：' + tweet_id);
 			tweetJsonToObject(data, function(tweet) {
 				console.log(tweet);
-				//logger.info(tweet);
 				callback(tweet);
 			});
 		}
 	});
 }
 
+/**
+ * 特定のユーザのフォロワーのIDを取得
+ * 
+ * @var String screen_name ユーザ名（@の後の文字列）
+ * @var Number count 件数
+ * @var function callback(friends)
+ */
+function getFollowerIds(screen_name, count, callback) {
+	var followers = {};
+	var url = 'https://api.twitter.com/1.1/followers/ids.json?cursor=-1&stringify_ids=true&screen_name=' + screen_name + '&count=100';
+	accessApiWithGet(url, function(json_data) {
+		var ids = json_data.ids;
+	    for (var i in ids) {
+	    	var id = String(ids[i]);
+	    	followers[id] = {
+				id: id
+			};
+		}
+		
+		callback(followers);
+	});
+}
+
+/**
+ * 自分のフォロワーのIDを取得
+ * 
+ * @var Number count
+ * @var function callback(friends)
+ */
+function getMyFollowerIds(count, callback) {
+	getFollowerIds(account.screen_name, count, callback);
+}
 
 /**
  * 特定のユーザがフォローしているユーザのIDを取得
  * 100件以上取得できる
+ * IDをキーにした連想配列で取得
  *
  * @var String screen_name
- * @var function callback
+ * @var Number count
+ * @var function callback(friends)
  */
-function getFriendIds(screen_name, callback) {
-	var url = 'https://api.twitter.com/1.1/friends/ids.json?screen_name=' + screen_name;
-
+function getFriendIds(screen_name, count, callback) {
 	var friends = {};
-
-	accessApiWithGet(url, function(data) {
-		var results = JSON.parse(data);
-		var ids = results.ids;
+	var url = 'https://api.twitter.com/1.1/friends/ids.json?cursor=-1&stringify_ids=true&screen_name=' + screen_name + '&count=' + count;
+	accessApiWithGet(url, function(json_data) {
+		var ids = json_data.ids;
 
 	    for (var i in ids) {
 	    	var id = String(ids[i]);
@@ -389,24 +430,50 @@ function getFriendIds(screen_name, callback) {
 				id: id
 			};
 		}
-
 		callback(friends);
 	});
 }
-
 
 /**
  * 自分がフォローしているユーザのIDを取得
  * 100件以上取得できる
  *
+ * @var Number count
  * @var function callback
  */
-function getMyFriendIds(callback) {
+function getMyFriendIds(count, callback) {
 	var screen_name = account.screen_name;
 
-	getFriendIds(screen_name, callback);
+	getFriendIds(screen_name, count, callback);
 }
 
+/**
+ * ユーザをフォロー
+ * 
+ * @var String user_id_str
+ * @var function callback
+ */
+function follow(user_id_str, callback) {
+	var url = 'https://api.twitter.com/1.1/friendships/create.json';
+	var data = {	
+	    	user_id: user_id_str,
+	    	follow: true
+	    };
+	accessApiWithPost(url, data, function() {
+		callback();
+	});
+}
+
+
+
+
+
+
+
+
+
+
+// 以下、削除予定
 
 /**
  * ツイートをRTした人のIDを取得
@@ -481,6 +548,50 @@ function getRtUserIds(tweet, callback) {
 }
 
 
+
+function accessApiWithGetO(url, callback) {
+	oauth.getProtectedResource(
+		url,
+		'GET',
+		account.access_token,
+		account.access_token_secret,
+		function(err, data, response) {
+			if(err){
+				logger.error(url);
+				logger.error(err);
+				return;
+			}
+
+			callback(data);
+		}
+	);
+}
+
+
+function accessApiWithPostOrg(url, callback) {
+	oauth.getProtectedResource(
+		url,
+		'POST',
+		account.access_token,
+		account.access_token_secret,
+		function(err, data_string, response) {
+			var data = {};
+			try {
+				data = JSON.parse(data_string);
+				if(err){
+					logger.error(url);
+					logger.error(data.errors);
+				}
+
+			} catch(e) {
+				logger.error(e);
+				data.errors = e;
+			}
+
+			callback(data);
+		}
+	);
+}
 
 
 

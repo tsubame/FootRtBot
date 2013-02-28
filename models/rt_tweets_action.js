@@ -64,7 +64,6 @@ function exec() {
 			// DBから取得
 			model.getRecentRetweets(100, function(tweets) {
 				recent_retweets = tweets;
-				console.log(recent_retweets);
 				callback();
 			});
 		},
@@ -79,8 +78,8 @@ function exec() {
 				pickup_rt_count = cand_base_rt_count;			
 			}
 
-			tw.pickupRtFromTl(pickup_rt_count, function(tweets) {
 			//tw.pickupRtFromTl(CONST.BASE_RT_COUNT, function(tweets) {
+			tw.pickupRtFromTl(pickup_rt_count, function(tweets) {
 				many_rt_tweets = tweets;
 				callback();
 			});
