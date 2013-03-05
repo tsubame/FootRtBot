@@ -11,7 +11,7 @@ var retweet_model      = require('../models/retweet_model')
 /**
  * exports.
  */
-exports.rtFromCandidates = rtFromCandidates;
+exports.rtAuto = rtAuto;
 exports.showCandidates = showCandidates;
 exports.deleteCandidate = deleteCandidate;
 exports.rtManually = rtManually;
@@ -34,10 +34,10 @@ function deleteCandidate(req, res) {
 /**
  * アクション
  *
- * RT候補のうちフォローしたユーザが2人以上RTしているものをリツイート
+ * RT候補をTL監視アカウントでリツイート
  *
  */
-function rtFromCandidates(req, res) {
+function rtAuto(req, res) {
 	var action = require('../models/rt_from_candidates_action');
 
 	action.exec();
@@ -70,7 +70,27 @@ function rtManually(req, res) {
  * RT候補を表示
  */
 function showCandidates(req, res){
-	rt_candidate_model.getRecents(100, function(recent_candidates) {
-		res.render('rt_candidate', { candidates: recent_candidates });
+	rt_candidate_model.getTodaysCandidates(function(candidates) {
+
+		for (var id in candidates) {
+			var date = candidates[id].posted;
+			var hour = date.getHours();
+			var min = date.getMinutes();
+			if (min < 10) {
+				var minStr = '0' + String(min);
+			} else {
+				var minStr = String(min);
+			}
+
+			var month = date.getMonth() + 1;
+			var day = date.getDate();
+			var year = date.getFullYear();
+			//console.log(hour + ':' + minStr + '　' + year + '年' + month + '月' + day + '日');
+
+			var date_str = hour + ':' + minStr + '　' + year + '年' + month + '月' + day + '日';
+			candidates[id].date_str = date_str;
+		}
+
+		res.render('rt_candidate', { candidates: candidates });
 	});
 };

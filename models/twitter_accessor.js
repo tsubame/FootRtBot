@@ -13,8 +13,8 @@ var OAuth = require('oauth').OAuth
   , async = require('async')
   , http  = require('http')
   , log4js = require('log4js');
-  
-  
+
+
 
 
 /**
@@ -84,7 +84,7 @@ var ACCESS_TOKEN_URL    = 'https://api.twitter.com/oauth/access_token';
 /**
  * TLから取得するツイートの数
  */
-var get_tl_count = 500;
+var get_tl_count = 300;//500;
 
 exports.setGetTlCount = function(count) {
 	get_tl_count = count;
@@ -201,7 +201,7 @@ function accessApiWithPost(url, data, callback) {
 				logger.error(e);
 				data.errors = e;
 			}
-		
+
 			callback(data);
 		}
 	);
@@ -278,7 +278,6 @@ function pickupRtFromTl(pickup_rt_count, callback) {
 	// 複数回リクエスト
 	for (var n = 1; n <= req_count; n++) {
 		var url = 'https://api.twitter.com/1.1/statuses/home_timeline.json?count=' + get_tl_count_once + '&page=' + n;
-		
 		accessApiWithGet(url, function(json_datas) {
 			if(! json_datas.errors){
 				for (var i in json_datas) {
@@ -289,7 +288,7 @@ function pickupRtFromTl(pickup_rt_count, callback) {
 					});
 				}
 			}
-			
+
 			req_end_count ++;
 		});
 	}
@@ -378,7 +377,7 @@ function retweet(tweet_id, callback) {
 
 /**
  * 特定のユーザのフォロワーのIDを取得
- * 
+ *
  * @var String screen_name ユーザ名（@の後の文字列）
  * @var Number count 件数
  * @var function callback(friends)
@@ -394,14 +393,14 @@ function getFollowerIds(screen_name, count, callback) {
 				id: id
 			};
 		}
-		
+
 		callback(followers);
 	});
 }
 
 /**
  * 自分のフォロワーのIDを取得
- * 
+ *
  * @var Number count
  * @var function callback(friends)
  */
@@ -449,13 +448,13 @@ function getMyFriendIds(count, callback) {
 
 /**
  * ユーザをフォロー
- * 
+ *
  * @var String user_id_str
  * @var function callback
  */
 function follow(user_id_str, callback) {
 	var url = 'https://api.twitter.com/1.1/friendships/create.json';
-	var data = {	
+	var data = {
 	    	user_id: user_id_str,
 	    	follow: true
 	    };

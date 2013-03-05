@@ -26,19 +26,49 @@ exports.LOG4JS_CONFIG = {
 	};
 
 /**
+ * この日数より前のツイートは無視
+ *
+ */
+exports.SKIP_PAST_DAY = 2;
+
+/**
  * TLから1度に取得するツイートの数
  */
 exports.TL_GET_COUNT_ONCE = 200;
 
 /**
+ * TLから取得するツイートの件数
+ */
+exports.GET_TL_COUNT = app_config.get_tl_count;
+
+// 削除予定
+/**
  * この数以上のRT数でリツイート
  */
-exports.BASE_RT_COUNT = app_config.base_rt_count; //70;
+//exports.BASE_RT_COUNT = app_config.base_rt_count; //70;
 
 /**
- * この数以上でツイート候補を取得
+ * この数以上のRT数でリツイート
  */
-exports.CAND_BASE_RT_COUNT = app_config.cand_base_rt_count; //50;
+exports.RETWEET_LEAST_RT = app_config.retweet_least_rt;
+
+/**
+ * この数以上でリツイート候補を取得（フォローしているユーザのツイート）
+ */
+exports.CAND_LEAST_RT_BY_FRIENDS = app_config.cand_least_rt_by_friends;
+
+/**
+ * この数以上でリツイート候補を取得（フォローしていないユーザのツイート）
+ */
+exports.CAND_LEAST_RT_BY_OTHERS = app_config.cand_least_rt_by_others;
+
+
+
+
+
+
+
+
 
 /**
  * トップページのアドレス
@@ -96,7 +126,14 @@ var ACCOUNT = {
 		consumer_key:        '',
 		consumer_secret:     '',
 		access_token:        '',
-		access_token_secret: ''	
+		access_token_secret: ''
+	},
+	DEV: {
+		screen_name:         '',
+		consumer_key:        '',
+		consumer_secret:     '',
+		access_token:        '',
+		access_token_secret: ''
 	}
 }
 
@@ -107,7 +144,7 @@ var ACCOUNT = {
  */
 if (DEV_LEVEL == 1) {
 	ACCOUNT.WATCH_TL = app_config.twitter.WATCH_TL;
-	ACCOUNT.TWEET    = app_config.twitter.WATCH_TL;
+	ACCOUNT.TWEET    = app_config.twitter.DEV;
 
 } else {
 	ACCOUNT.WATCH_TL = app_config.twitter.WATCH_TL;

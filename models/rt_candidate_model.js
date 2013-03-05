@@ -15,7 +15,7 @@ var mongoose = require('mongoose');
 exports.save   = save;
 exports.saveIfNotExist = saveIfNotExist;
 exports.remove = remove;
-exports.getRecents = getRecents;
+exports.getRecentCandidates = getRecentCandidates;
 exports.removeById = removeById;
 exports.getTodaysCandidates = getTodaysCandidates;
 exports.setDeleted = setDeleted;
@@ -35,6 +35,7 @@ var schema = new mongoose.Schema({
 	created:     { type: Date, required: true},
 	rt_user:     { type: String},
 	is_deleted:  { type: Boolean, default: false}
+	//is_already_retweeted: {}
 });
 
 
@@ -208,8 +209,8 @@ function saveIfNotExist(tweet) {
  *
  * @var function callback
  */
-function getRecents(limit, callback) {
-
+function getRecentCandidates(limit, callback) {
+	var tweets = {};
 	if (!limit) {
 		limit = 100;
 	}
@@ -223,7 +224,12 @@ function getRecents(limit, callback) {
 		if (err) {
 			console.log(err);
 		} else {
-			callback(result);
+			for (var i = 0; i < result.length; i++) {
+				var id = result[i].id;
+				tweets[id] = result[i];
+			}
+
+			callback(tweets);
 		}
 	});
 }

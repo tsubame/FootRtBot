@@ -66,7 +66,7 @@ function demo(req, res) {
 	/*
 	logger.info('This is test.');
 	logger.error('This is test.');
-	
+
 	/*
 	log4js.configure({
 		appenders: [{

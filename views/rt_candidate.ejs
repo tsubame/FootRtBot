@@ -19,13 +19,24 @@ for(var i in candidates) {
 <div class = 'candidate' id = 'candidate_<%= candidates[i].id %>'>
 	<%= candidates[i].user_name %><br />
 	<%= candidates[i].text %><br />
-	RT : <%= candidates[i].rt_count %>　　RT by :<%= candidates[i].rt_user %><br />
+	RT : <%= candidates[i].rt_count %>　　
+	<%= candidates[i].date_str %>　　
+	<% if (candidates[i].rt_user != null) { %>
+		RT by :<%= candidates[i].rt_user %>
+	<%
+	}
+
+	%>
+	<br />
+
 	<!-- <a href = 'rt_manually/<%= candidates[i].id %>'>リツイート</a>　
 	<a href = 'delete<%= candidates[i].id %>'>削除</a>
 	-->
-	<input type = 'button' class = 'retweetCandidateButton' name = '<%= candidates[i].id %>' value = 'リツイート' /><br />
+	<input type = 'button' class = 'retweetCandidateButton' name = '<%= candidates[i].id %>' value = 'リツイート' /><br /><br />
 
-	<input type = 'button' class = 'deleteCandidateButton' name = '<%= candidates[i].id %>' value = '削除' /><br />
+	<!--
+		<input type = 'button' class = 'deleteCandidateButton' name = '<%= candidates[i].id %>' value = '削除' /><br />
+	-->
 </div>
 <br />
 <%

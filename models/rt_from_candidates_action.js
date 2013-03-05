@@ -45,23 +45,18 @@ function exec() {
 	    function(cb) {
 	    	for (var i = 0; i < candidates.length; i++) {
 	    		var tweet = candidates[i];
-
 	    		// RT
 				tw.retweet(tweet.id, function(retweet) {
 					if (retweet) {
 						console.log(retweet);
-						//retweet_model.save(retweet);
-						//rt_candidate_model.setDeleted(retweet.id);
 					}
-					//end_count ++;
 				});
 			}
-		},
-		function(cb) {
-			//
-	    	//tw.setAccount(CONST.ACCOUNT.TWEET);
-			pickupRtTweets(cb);
 		}
+	    /*,
+		function(cb) {
+			pickupRtTweets(cb);
+		}*/
 	],
 	function(err, results) {
 		if(err) {
@@ -75,7 +70,7 @@ function exec() {
 
 
 
-
+/*
 function execOrg() {
 	tw.setAccount(CONST.ACCOUNT.WATCH_TL);
 
@@ -109,9 +104,6 @@ function execOrg() {
 	});
 }
 
-/**
- *
- */
 function pickupRtTweets(callback) {
 	var end_count = 0;
 
@@ -160,3 +152,4 @@ function pickupRtTweets(callback) {
 		}
 	}, 500);
 }
+*/

@@ -50,7 +50,7 @@ app.get('/', function(req, res){
 });
 
 app.get('/rt_candidate/show',                  rt_candidate.showCandidates);
-app.get('/rt_candidate/rt_auto',               rt_candidate.rtFromCandidates);
+app.get('/rt_candidate/rt_auto',               rt_candidate.rtAuto);
 app.get('/rt_candidate/rt_manually/:tweet_id', rt_candidate.rtManually);
 app.get('/rt_candidate/delete/:tweet_id',      rt_candidate.deleteCandidate);
 
