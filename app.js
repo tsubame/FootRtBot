@@ -16,7 +16,6 @@ var app = express();
  * 設定
  */
 app.configure(function(){
-	//app.set('port', process.env.PORT || 3000);
 	app.set('port', process.env.PORT || CONST.PORT);
 	app.set('views', __dirname + '/views');
 	app.set('view engine', 'ejs');
@@ -36,7 +35,6 @@ app.configure(function(){
 });
 
 app.configure('development', function(){
-	//models.init('localhost', 'foot_rt');
 	app.use(express.errorHandler());
 });
 
@@ -60,11 +58,6 @@ app.get('/retweet/sendmail',   retweet.sendRtMail);
 app.get('/retweet/demo',	   retweet.demo);
 
 app.get('/follower/refollow_auto', follower.refollowAuto);
-
-/*
-app.get('/follow_candidate/update', follow_candidate.update);
-app.get('/follow_candidate/show', follow_candidate.show);
-*/
 
 http.createServer(app).listen(app.get('port'), function(){
 	console.log("Express server listening on port " + app.get('port'));

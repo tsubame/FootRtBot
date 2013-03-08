@@ -62,10 +62,10 @@ exports.CAND_LEAST_RT_BY_FRIENDS = app_config.cand_least_rt_by_friends;
  */
 exports.CAND_LEAST_RT_BY_OTHERS = app_config.cand_least_rt_by_others;
 
-
-
-
-
+/**
+ * 特定の人のRT基準数
+ */
+exports.PARTICULAR_RT_LIST = app_config.particular_rt_list;
 
 
 

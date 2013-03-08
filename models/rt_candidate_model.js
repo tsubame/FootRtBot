@@ -35,7 +35,6 @@ var schema = new mongoose.Schema({
 	created:     { type: Date, required: true},
 	rt_user:     { type: String},
 	is_deleted:  { type: Boolean, default: false}
-	//is_already_retweeted: {}
 });
 
 
@@ -219,7 +218,8 @@ function getRecentCandidates(limit, callback) {
 	.find({})
 	.where('is_deleted').equals(false)
 	.limit(limit)
-	.sort('-created')
+	//.sort('-created')
+	.sort('-posted')
 	.exec(function(err, result) {
 		if (err) {
 			console.log(err);
@@ -247,7 +247,8 @@ function getTodaysCandidates(callback) {
 	.find({})
 	.where('created').gt(yesterday)
 	.where('is_deleted').equals(false)
-	.sort('-created')
+	//.sort('-created')
+	.sort('-posted')
 	.exec(function(err, result) {
 		if (err) {
 			console.log(err);

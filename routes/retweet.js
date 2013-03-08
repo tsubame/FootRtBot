@@ -62,17 +62,24 @@ function sendRtMail(req, res) {
 function demo(req, res) {
 	tw.setAccount(CONST.ACCOUNT.TWEET);
 	//tw.setAccount(CONST.ACCOUNT.WATCH_TL);
-	tw.demo();
-	/*
-	logger.info('This is test.');
-	logger.error('This is test.');
+	//tw.demo();
 
-	/*
-	log4js.configure({
-		appenders: [{
-		'type': 'file',
-		'filename': './logs/logging.log'
-		}]
-	});*/
+	var functions = [
+	             function(cb) {
+	            	 console.log('((ﾉ)・ω・(ヾ)ﾑﾆﾑﾆ');
+	            	 cb();
+	             },
+	             function(cb) {
+	             	console.log('(o´・ω・｀)σ)Д｀)ﾌﾟﾆｮﾌﾟﾆｮ');
+	             	cb();
+	             }
+
+	             ];
+	var cb = function() {};
+	functions[1](cb);
+
+	var async = require('async');
+	async.series(functions);
+
 	res.send('done.');
 }

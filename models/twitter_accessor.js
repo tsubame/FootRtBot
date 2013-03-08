@@ -219,7 +219,6 @@ function accessApiWithPost(url, data, callback) {
 function getUserTimeline(screen_name, callback) {
 	var tweets = {};
 	var url = 'https://api.twitter.com/1.1/statuses/user_timeline.json?count=200&screen_name=' + screen_name;
-	//accessApiWithGet(url, function(json_string) {
 	accessApiWithGet(url, function(json_datas) {
 		//var json_datas = JSON.parse(json_string);
 		// ツイートの件数ループ
@@ -257,10 +256,9 @@ function getUserTimeline(screen_name, callback) {
  * @var function callback(tweets)
  */
 function getMyTimeLine(callback) {
+
 	getUserTimeline(account.screen_name, callback);
 }
-
-// 1と1.1どっちが良い？
 
 /**
  * TLから一定数以上のRTのツイートを取り出す
